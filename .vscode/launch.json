@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Accelerate Script",
+        "type": "debugpy",
+        "request": "launch",
+        "module":"eagle.testbug.debug_flow", //"accelerate.commands.launch",
+        "args": [
+          // "--mixed_precision", "bf16",
+          // "--multi_gpu",
+          // "--module", "eagle.train.main.py",
+          // "--tmpdir", "/home/farinneya/projects/eagle_data/sharegpt_0_67999_mufp16/",
+          // "--cpdir", "/home/farinnneya/projects/checkpoints/"
+        ],
+        "console": "integratedTerminal",
+        "justMyCode": false,
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/eagle",
+          "CUDA_VISIBLE_DEVICES": "1"
+        }
+      }
+    ]
+  }
