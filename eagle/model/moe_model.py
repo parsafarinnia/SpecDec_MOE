@@ -1,25 +1,27 @@
 # In a new file, e.g., eagle/modelbsne1/moe_model.py
 
-from .ea_model import EaModel
+from eagle.model.ea_model import EaModel
 import copy
 import numpy as np
 
 class MOEagleModel(EaModel):
-    def __init__(self, base_model, base_model_name_or_path, ea_model_path, num_drafts=5):
-        super().__init__(base_model, base_model_name_or_path, ea_model_path)
+    def __init__(self, base_model, base_model_name_or_path, ea_model_path, total_token, depth, top_k, threshold, ea_layer_state_dict):
+        super().__init__(base_model, base_model_name_or_path, ea_model_path, total_token, depth, top_k, threshold, ea_layer_state_dict)
         
         # Initialize multiple draft models
+    def init_draft_models(self, num_drafts):
         self.draft_models = [copy.deepcopy(self.ea_layer) for _ in range(num_drafts)]
+        self.num_drafts = num_drafts
         
     def forward(self, input_ids=None, attention_mask=None, labels=None, past_key_values=None, output_orig=False, position_ids=None, init=True, logits_processor=None):
         # Logic to select which draft model to use
         # For example, you could use a gating mechanism here
-        selected_draft = self.select_draft(input_ids)
+        selected_draft = self.select_draft()
         
         # Call the forward method of the selected draft model
         return selected_draft(input_ids, attention_mask, labels, past_key_values, output_orig, position_ids, init, logits_processor)
 
-    def select_draft(self, input_ids, temperature=1.0):
+    def select_draft(self, temperature=1.0):
         # Implement your logic to select a draft model based on input_ids
         # For example, you could use a simple heuristic or a learned gating mechanism
         # Here, we just return a random draft for demonstration 
