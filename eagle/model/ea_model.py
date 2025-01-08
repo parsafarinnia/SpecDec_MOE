@@ -52,7 +52,6 @@ class EaModel(nn.Module):
         except:
             bias=True
         self.ea_layer = Model(config,bias=bias,total_tokens=total_token,depth=depth,top_k=top_k,threshold=threshold)
-
         low_memory=False
 
         device = base_model.model.layers[-1].self_attn.q_proj.weight.device
@@ -66,6 +65,7 @@ class EaModel(nn.Module):
         else:
             self.ea_layer.diff_device = False
         self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
+        # TODO: Check if you are loading the ea_layer since you are initializng the model on top
         self.ea_layer.to(self.base_model.dtype).to(device)
         self.ea_layer.init_tree()
 
@@ -212,7 +212,7 @@ class EaModel(nn.Module):
 
         padding=(torch.zeros(1,1,dtype=torch.long)-1).to(input_ids.device)
         input_ids = input_ids.clone()
-        self.ea_layer.reset_kv()
+        self.ea_layer.reset_kv()#TODO: need to reset for all the experts
 
 
 
@@ -506,6 +506,7 @@ class EaModel(nn.Module):
         padding = (torch.zeros(1, 1, dtype=torch.long) - 1).to(input_ids.device)
         input_ids = input_ids.clone()
         self.ea_layer.reset_kv()
+        
 
         # Initialize the past key and value states
         if hasattr(self, "past_key_values"):
@@ -558,5 +559,14 @@ class EaModel(nn.Module):
             if input_ids.shape[1] > max_length:
                 break
 
+    def init_draft_models(self, num_drafts):
+        self.MOE_setting = True
+        self.ea_layer = Model(self.config, 
+            bias=self.ea_layer.bias,
+            total_tokens=self.ea_layer.total_tokens,
+            depth=self.ea_layer.depth,
+            top_k=self.ea_layer.top_k,
+            threshold=self.ea_layer.threshold
+        )
 
 

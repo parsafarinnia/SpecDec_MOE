@@ -37,7 +37,11 @@ train_config = {
     "b1": 0.9,
     "b2": 0.95,
     "grad_clip": 0.5,
-    "save_freq": 5
+    "save_freq": 5,
+    #MOE setting
+    "MOE_setting":False,
+    "num_experts":3,
+    "MOE_top_k":2
 }
 import json
 from safetensors import safe_open
