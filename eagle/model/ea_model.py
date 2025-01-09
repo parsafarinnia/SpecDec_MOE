@@ -34,7 +34,10 @@ class EaModel(nn.Module):
             depth,
             top_k,
             threshold,
-            ea_layer_state_dict
+            ea_layer_state_dict,
+            Moe_setting = False,
+            num_drafts = 3,
+            top_k_moe = 2
     ):
 
         super().__init__()
@@ -44,6 +47,7 @@ class EaModel(nn.Module):
         self.vocab_size = base_model.lm_head.weight.shape[0]
         self.base_model_name_or_path = base_model_name_or_path
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model_name_or_path,use_fast=False)
+        self.MOE_setting = Moe_setting
         config = EConfig.from_pretrained(ea_model_path)
         with open(ea_model_path,"r") as f:
             con=json.loads(f.read())
@@ -52,7 +56,7 @@ class EaModel(nn.Module):
         except:
             bias=True
             # TODO_Solved: Don't need to change Model, just need to add MOE configs to inputs
-        self.ea_layer = Model(config,bias=bias,total_tokens=total_token,depth=depth,top_k=top_k,threshold=threshold)
+        self.ea_layer = Model(config,bias=bias,total_tokens=total_token,depth=depth,top_k=top_k,threshold=threshold,Moe_setting=Moe_setting,num_drafts=num_drafts,top_k_moe=top_k_moe)
         low_memory=False
 
         device = base_model.model.layers[-1].self_attn.q_proj.weight.device
@@ -88,6 +92,9 @@ class EaModel(nn.Module):
             depth=5,
             top_k=10,
             threshold=1.0,
+            Moe_setting = False,
+            num_drafts = 3,
+            top_k_moe = 2,
             **kwargs,
     ):
         #assert Type=="LLaMA" or "Mixtral"
