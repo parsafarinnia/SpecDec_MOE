@@ -389,7 +389,7 @@ class LlamaRMSNorm(nn.Module):
         return self.weight * hidden_states.to(input_dtype)
 
 
-class LlamaDecoderLayer(nn.Module):
+class  LlamaDecoderLayer(nn.Module):
     def __init__(self, config, index):
         super().__init__()
         self.hidden_size = config.hidden_size
@@ -504,8 +504,9 @@ class Model(nn.Module):
         self.depth = depth
         self.threshold = math.log(threshold)
 
-        # TODO: add multiple draft models
-        self.layers = nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
+        # TODO_Solved: Change llamaDecoderLayer to EagleDecoderLayer
+        # self.layers = nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
+        self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, index) for index in range(config.num_hidden_layers)])
         self.fc = nn.Linear(2 * config.hidden_size, config.hidden_size, bias=bias)
         self.act = ACT2FN[config.hidden_act]
         self.logsoftmax = nn.LogSoftmax(dim=-1)
@@ -891,7 +892,7 @@ class MOE_Model(Model):
         super().__init__(config, base_model, ea_model_path, total_token, depth, top_k, threshold, low_memory)
 
 
-class EEEagleBlockSparseTop2MLP(nn.Module):
+class EagleBlockSparseTop2MLP(nn.Module):
     def __init__(self, config: MixtralConfig):
         super().__init__()
         self.ffn_dim = config.intermediate_size
@@ -908,7 +909,7 @@ class EEEagleBlockSparseTop2MLP(nn.Module):
         current_hidden_states = self.w2(current_hidden_states)
         return current_hidden_states
 
-class MixtralSparseMoeBlock(nn.Module):
+class EagleSparseMoeBlock(nn.Module):
     """
     This implementation is
     strictly equivalent to standard MoE with full capacity (no
@@ -930,7 +931,7 @@ class MixtralSparseMoeBlock(nn.Module):
         # gating
         self.gate = nn.Linear(self.hidden_dim, self.num_experts, bias=False)
 
-        self.experts = nn.ModuleList([MixtralBlockSparseTop2MLP(config) for _ in range(self.num_experts)])
+        self.experts = nn.ModuleList([EagleBlockSparseTop2MLP(config) for _ in range(self.num_experts)])
 
         # Jitter parameters
         self.jitter_noise = config.router_jitter_noise
@@ -975,6 +976,124 @@ class MixtralSparseMoeBlock(nn.Module):
         final_hidden_states = final_hidden_states.reshape(batch_size, sequence_length, hidden_dim)
         return final_hidden_states, router_logits
 
+class LlamaDecoderLayerMoE(nn.Module):
+    """
+    A variant of the Llama decoder layer that replaces the standard MLP
+    with a Mixtral-based MoE block (top-k gating).
+    """
+
+    def __init__(self, config, index, mixtral_config=None):
+        """
+        Args:
+            config: Llama config object.
+            index: The index of this decoder layer in the stack.
+            mixtral_config: An optional MixtralConfig if you want to have specialized
+                            parameters for the MoE block. If not given, you can rely on
+                            the existing config fields or pass them in externally.
+        """
+        super().__init__()
+        self.index = index
+        self.hidden_size = config.hidden_size
+
+        # === 1) Self-Attention ===
+        self.self_attn = LlamaAttention(config=config)
+
+        # Optional input LN if index > 0
+        if self.index != 0:
+            self.input_layernorm = LlamaRMSNorm(self.hidden_size, eps=config.rms_norm_eps)
+
+        # Post-attention RMSNorm
+        self.post_attention_layernorm = LlamaRMSNorm(self.hidden_size, eps=config.rms_norm_eps)
+
+        # === 2) MoE-based feed-forward ===
+        #
+        # Instead of:
+        #    self.mlp = LlamaMLP(config)
+        # We create a Mixtral-based MoE block here.
+        #
+        # You can define your own config, or map the relevant fields from `config`
+        # into `MixtralConfig`. For example, if you have a custom
+        # `mixtral_config = MixtralConfig(...)` you can pass it here, or
+        # adapt `config` to the fields required by your MoE block.
+
+        if mixtral_config is None:
+            # Minimal example of creating a Mixtral config from existing Llama config
+            # Adjust the fields to match your EEEagleBlockSparseTop2MLP, MixtralSparseMoeBlock, etc.
+            from dataclasses import dataclass
+
+            @dataclass
+            class DummyMixtralConfig:
+                hidden_size: int = config.hidden_size
+                intermediate_size: int = config.intermediate_size
+                hidden_act: str = config.hidden_act
+                num_local_experts: int = 3           # example
+                num_experts_per_tok: int = 2         # top-k gating (top-2)
+                router_jitter_noise: float = 0.0     # example
+                # ... add other fields needed by your MoE
+
+            mixtral_config = DummyMixtralConfig()
+
+        # Now we instantiate our Mixtral-based MoE feed-forward.
+        self.moe_ffn = EagleSparseMoeBlock(mixtral_config)
+
+    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        attention_mask: Optional[torch.Tensor] = None,
+        position_ids: Optional[torch.LongTensor] = None,
+        past_key_value: Optional[Tuple[torch.Tensor]] = None,
+        output_attentions: Optional[bool] = False,
+        use_cache: Optional[bool] = False,
+    ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
+        """
+        Args:
+            hidden_states: (batch, seq_len, embed_dim)
+            attention_mask: (batch, 1, tgt_len, src_len)
+            position_ids:
+            past_key_value:
+            output_attentions:
+            use_cache:
+        Returns:
+            hidden_states, (optionally) self_attn weights, (optionally) present_key_value
+        """
+
+        # === 1) Pre-Attention Norm (if not the first layer) ===
+        residual = hidden_states
+        if self.index != 0:
+            hidden_states = self.input_layernorm(hidden_states)
+
+        # === 2) Self-Attention ===
+        hidden_states, self_attn_weights, present_key_value = self.self_attn(
+            hidden_states=hidden_states,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_value=past_key_value,
+            output_attentions=output_attentions,
+            use_cache=use_cache,
+        )
+        # Add the residual
+        hidden_states = residual + hidden_states
+
+        # === 3) Post-Attention Norm ===
+        residual = hidden_states
+        hidden_states = self.post_attention_layernorm(hidden_states)
+
+        # === 4) Mixtral MoE-based Feed Forward ===
+        # Instead of LlamaMLP, we do:
+        hidden_states, router_logits = self.moe_ffn(hidden_states)
+
+        # Add the residual
+        hidden_states = residual + hidden_states
+
+        outputs = (hidden_states,)
+
+        if output_attentions:
+            outputs += (self_attn_weights,)
+
+        if use_cache:
+            outputs += (present_key_value,)
+
+        return outputs
 class Vhead(nn.Module):
     def __init__(self, ins=6566, outs=32000):
         super().__init__()

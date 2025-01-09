@@ -51,6 +51,7 @@ class EaModel(nn.Module):
             bias=con["bias"]
         except:
             bias=True
+            # TODO_Solved: Don't need to change Model, just need to add MOE configs to inputs
         self.ea_layer = Model(config,bias=bias,total_tokens=total_token,depth=depth,top_k=top_k,threshold=threshold)
         low_memory=False
 
