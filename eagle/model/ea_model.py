@@ -48,6 +48,8 @@ class EaModel(nn.Module):
         self.base_model_name_or_path = base_model_name_or_path
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model_name_or_path,use_fast=False)
         self.MOE_setting = Moe_setting
+        self.num_drafts = num_drafts
+        self.top_k_moe = top_k_moe
         config = EConfig.from_pretrained(ea_model_path)
         with open(ea_model_path,"r") as f:
             con=json.loads(f.read())
@@ -69,7 +71,10 @@ class EaModel(nn.Module):
 
         else:
             self.ea_layer.diff_device = False
-        self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
+        if not Moe_setting:
+            self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
+        else:
+            self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
         # TODO: Check if you are loading the ea_layer since you are initializng the model on top
         self.ea_layer.to(self.base_model.dtype).to(device)
         self.ea_layer.init_tree()
@@ -120,9 +125,10 @@ class EaModel(nn.Module):
             load_model_path=os.path.join(ea_model_path, "pytorch_model.bin")
             if not os.path.exists(load_model_path):
                 load_model_path=hf_hub_download(ea_model_path, "pytorch_model.bin")
-            ea_layer_state_dict = torch.load(load_model_path,
-                                             map_location=base_model.device)
-        except:
+            ea_layer_state_dict = torch.load(load_model_path,map_location=base_model.device)
+
+        except Exception as e:
+            print(f"PF-Check: Failed to load model from {load_model_path}: {e}")
             from safetensors.torch import load_file
             load_model_path = os.path.join(ea_model_path, "model.safetensors")
             if not os.path.exists(load_model_path):
@@ -136,7 +142,10 @@ class EaModel(nn.Module):
             depth,
             top_k,
             threshold,
-            ea_layer_state_dict
+            ea_layer_state_dict,
+            Moe_setting = Moe_setting,
+            num_drafts = num_drafts,
+            top_k_moe = top_k_moe,
         )
 
 

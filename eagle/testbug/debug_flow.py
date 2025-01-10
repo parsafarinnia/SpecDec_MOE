@@ -5,13 +5,17 @@ import torch
 MOE_setting = True
 num_drafts=3
 
+from huggingface_hub import hf_hub_download
+ea_model_path = "yuhuili/EAGLE-Vicuna-7B-v1.3"
+load_model_path=hf_hub_download(ea_model_path, "pytorch_model.bin")
+ea_layer_state_dict = torch.load(load_model_path)
 model = EaModel.from_pretrained(
         base_model_path="lmsys/vicuna-7b-v1.3",
         ea_model_path="yuhuili/EAGLE-Vicuna-7B-v1.3",
         torch_dtype=torch.float16,
         low_cpu_mem_usage=True,
         device_map="auto",
-        total_token=3,
+        total_token=10,
         Moe_setting = MOE_setting,
         num_drafts = 3,
         top_k_moe = 2

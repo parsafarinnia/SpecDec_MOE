@@ -473,6 +473,7 @@ class LlamaDecoderLayerMoE(nn.Module):
         self.index = index
         self.hidden_size = config.hidden_size
         self.num_drafts = num_drafts
+        self.top_k_moe = top_k_moe
 
         # === 1) Self-Attention ===
         self.self_attn = LlamaAttention(config=config)
@@ -500,20 +501,57 @@ class LlamaDecoderLayerMoE(nn.Module):
             # Adjust the fields to match your EEEagleBlockSparseTop2MLP, MixtralSparseMoeBlock, etc.
             from dataclasses import dataclass
 
-            @dataclass
+            # @dataclass
+            # class DummyMixtralConfig:
+            #     hidden_size: int = config.hidden_size
+            #     intermediate_size: int = config.intermediate_size
+            #     hidden_act: str = config.hidden_act
+            #     num_local_experts: int           # example
+            #     num_experts_per_tok: int         # top-k gating (top-2)
+            #     router_jitter_noise: float = 0.0
+            #     num_drafts: int 
+            #     top_k: int
             class DummyMixtralConfig:
-                hidden_size: int = config.hidden_size
-                intermediate_size: int = config.intermediate_size
-                hidden_act: str = config.hidden_act
-                num_local_experts: int = 3           # example
-                num_experts_per_tok: int = 2         # top-k gating (top-2)
-                router_jitter_noise: float = 0.0
-                num_drafts: int = self.num_drafts
-                top_k: int = self.top_k_moe
+                def __init__(
+                    self,
+                    hidden_size: int,
+                    intermediate_size: int,
+                    hidden_act: str,
+                    num_local_experts: int,
+                    num_experts_per_tok: int,
+                    router_jitter_noise: float = 0.0,
+                    num_drafts: int = 3,
+                    top_k_moe: int = 2,
+                ):
+                    self.hidden_size = hidden_size
+                    self.intermediate_size = intermediate_size
+                    self.hidden_act = hidden_act
+                    self.num_local_experts = num_local_experts
+                    self.num_experts_per_tok = num_experts_per_tok
+                    self.router_jitter_noise = router_jitter_noise
+                    self.num_drafts = num_drafts
+                    self.top_k_moe = top_k_moe
+
+            # Then:
+            mixtral_config = DummyMixtralConfig(
+                hidden_size=config.hidden_size,
+                intermediate_size=config.intermediate_size,
+                hidden_act=config.hidden_act,
+                num_local_experts=num_drafts,
+                num_experts_per_tok=top_k_moe,
+                num_drafts=num_drafts,
+                top_k_moe=top_k_moe,
+            )
+
                      # example
                 # ... add other fields needed by your MoE
 
-            mixtral_config = DummyMixtralConfig()
+            # mixtral_config = DummyMixtralConfig(
+            #     num_local_experts = num_drafts,           # example
+            #     num_experts_per_tok = top_k_moe,
+            #     num_drafts = num_drafts,
+            #     top_k = top_k_moe
+            # )
 
         # Now we instantiate our Mixtral-based MoE feed-forward.
         #TODO: make sure this is mlp itself and not the something else
@@ -577,9 +615,7 @@ class LlamaDecoderLayerMoE(nn.Module):
             outputs += (present_key_value,)
 
         return outputs
-# class MOE_Model(Model):
-    def __init__(self, config, base_model, ea_model_path, total_token, depth, top_k, threshold, low_memory=False):
-        super().__init__(config, base_model, ea_model_path, total_token, depth, top_k, threshold, low_memory)
+
 
 
 class EagleBlockSparseTop2MLP(nn.Module):
@@ -617,7 +653,7 @@ class EagleSparseMoeBlock(nn.Module):
         self.hidden_dim = config.hidden_size
         self.ffn_dim = config.intermediate_size
         self.num_experts = config.num_drafts
-        self.top_k = config.top_K_moe
+        self.top_k = config.top_k_moe
 
         # gating
         self.gate = nn.Linear(self.hidden_dim, self.num_experts, bias=False)
@@ -686,6 +722,9 @@ class Model(nn.Module):
         self.gradient_checkpointing = True
         self.padding_idx = config.pad_token_id
         self.vocab_size = config.vocab_size
+        self.MOE_setting = Moe_setting
+        self.num_drafts = num_drafts
+        self.top_K_moe = top_k_moe
 
         self.embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size, self.padding_idx)
         if load_emb:
@@ -716,7 +755,11 @@ class Model(nn.Module):
 
         # TODO_Solved: Change llamaDecoderLayer to EagleDecoderLayer
         # self.layers = nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
-        self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, index, num_drafts, top_k_moe) for index in range(config.num_hidden_layers)]) if Moe_setting  else nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
+        if Moe_setting:
+            # self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, index, num_drafts, top_k_moe) for index in range(config.num_hidden_layers)])
+            self.layers = [LlamaDecoderLayerMoE(config, 0, num_drafts, top_k_moe)]
+        else:
+            self.layers =nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
         
         self.fc = nn.Linear(2 * config.hidden_size, config.hidden_size, bias=bias)
         self.act = ACT2FN[config.hidden_act]
