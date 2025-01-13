@@ -9,17 +9,30 @@ from huggingface_hub import hf_hub_download
 ea_model_path = "yuhuili/EAGLE-Vicuna-7B-v1.3"
 load_model_path=hf_hub_download(ea_model_path, "pytorch_model.bin")
 ea_layer_state_dict = torch.load(load_model_path)
-model = EaModel.from_pretrained(
-        base_model_path="lmsys/vicuna-7b-v1.3",
-        ea_model_path="yuhuili/EAGLE-Vicuna-7B-v1.3",
-        torch_dtype=torch.float16,
-        low_cpu_mem_usage=True,
-        device_map="auto",
-        total_token=10,
-        Moe_setting = MOE_setting,
-        num_drafts = 3,
-        top_k_moe = 2
-    )
+if not MOE_setting:
+    model = EaModel.from_pretrained(
+            base_model_path="lmsys/vicuna-7b-v1.3",
+            ea_model_path="yuhuili/EAGLE-Vicuna-7B-v1.3",
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
+            device_map="auto",
+            total_token=10,
+            Moe_setting = MOE_setting,
+            num_drafts = 3,
+            top_k_moe = 2
+        )
+else:
+    model = EaModel.from_pretrained(
+            base_model_path="lmsys/vicuna-7b-v1.3",
+            ea_model_path="yuhuili/EAGLE-Vicuna-7B-v1.3",
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
+            device_map="auto",
+            total_token=10,
+            Moe_setting = MOE_setting,
+            num_drafts = 3,
+            top_k_moe = 2
+        )
 model.eval()
 your_message="Hello"
 conv = get_conversation_template("vicuna")
@@ -32,3 +45,5 @@ output_ids=model.eagenerate(input_ids,temperature=0.5,max_new_tokens=512)
 
 output=model.tokenizer.decode(output_ids[0]) 
 print(output)
+
+

@@ -74,7 +74,21 @@ class EaModel(nn.Module):
         if not Moe_setting:
             self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
         else:
-            self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
+            
+            old_sd = ea_layer_state_dict  # the old dictionary from HF
+            new_ea_state = self.ea_layer.state_dict()  # your new MoE layer
+
+            # 1. Merge the common keys (like self_attn, layernorm, embed_tokens, fc, etc.)
+            for k in new_ea_state.keys():
+                if k in old_sd and new_ea_state[k].shape == old_sd[k].shape:
+                    new_ea_state[k] = old_sd[k]
+
+            # 2. Then do your MLP-specific rename logic
+            new_ea_state = map_old_mlp_to_mixtral(old_sd, new_ea_state)
+
+            # 3. Finally load it back
+            self.ea_layer.load_state_dict(new_ea_state, strict=False)
+
         # TODO: Check if you are loading the ea_layer since you are initializng the model on top
         self.ea_layer.to(self.base_model.dtype).to(device)
         self.ea_layer.init_tree()

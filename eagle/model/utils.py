@@ -1,6 +1,6 @@
 import copy
 import random
-
+import re
 # typing 
 from typing import List, Tuple
 
@@ -461,7 +461,100 @@ def update_inference_inputs(
     new_token += accept_length + 1
 
     return input_ids, draft_tokens, retrieve_indices,tree_mask,tree_position_ids, new_token, None, token
+def compare_ea_keys(sd_new, sd_old):
+    """
+    sd_new: an OrderedDict of the new (Mixtral) EA layer state_dict (keys).
+    sd_old: an OrderedDict of the old (original) EA layer state_dict (keys).
 
+    Returns three lists:
+        common_keys, only_in_new, only_in_old
+    """
+    new_keys = set(sd_new.keys())
+    old_keys = set(sd_old.keys())
+
+    common_keys = sorted(list(new_keys & old_keys))
+    only_in_new = sorted(list(new_keys - old_keys))
+    only_in_old = sorted(list(old_keys - new_keys))
+
+    return common_keys, only_in_new, only_in_old
+
+
+def print_ea_comparison(ea_layer_new, ea_layer_old):
+    sd_new = ea_layer_new.state_dict()
+    sd_old = ea_layer_old  # or ea_layer_old.state_dict() if it's a module
+
+    common, in_new, in_old = compare_ea_keys(sd_new, sd_old)
+
+    print("=== Common Keys ===")
+    for k in common:
+        print(" ", k)
+    print("\n=== Only in NEW (Mixtral) ===")
+    for k in in_new:
+        print(" ", k)
+    print("\n=== Only in OLD (Draft) ===")
+    for k in in_old:
+        print(" ", k)
+
+
+def map_old_mlp_to_mixtral(old_sd, new_sd):
+    """
+    old_sd: Dict from the old LLaMA MLP checkpoint, 
+            typically with keys like 'layers.0.mlp.gate_proj.weight',
+            'layers.0.mlp.up_proj.weight', 'layers.0.mlp.down_proj.weight'.
+    new_sd: Dict for the new Mixtral MoE MLP, which might have keys:
+            'layers.0.mlp.experts.<N>.w[1-3].weight'
+    We want:
+        w1 -> gate_proj
+        w2 -> down_proj
+        w3 -> up_proj
+    """
+    # Copy everything so we have a baseline
+    merged_sd = dict(new_sd)
+
+    # The direct mapping from new wN -> old MLP sub-proj
+    # (as specified: w1 = gate, w2 = down, w3 = up)
+    w_map = {
+        "w1": "gate_proj",
+        "w2": "down_proj",
+        "w3": "up_proj",
+    }
+
+    # We'll search for new keys that match: 
+    #   layers.x.mlp.experts.<some_digit>.w(1|2|3).weight
+    # Then see if we can find the corresponding old key 
+    #   layers.x.mlp.<the_thing>.weight
+    #
+    # We only do the replacement if old_sd has that key.
+    #
+    # Example new key: "layers.0.mlp.experts.2.w1.weight"
+    # Example old key: "layers.0.mlp.gate_proj.weight"
+
+    pattern = re.compile(r"^(layers\.\d+\.mlp\.experts\.\d+\.)"
+                         r"(w[1-3])(\.weight)$")
+
+    for new_k, new_v in new_sd.items():
+        match = pattern.match(new_k)
+        if match:
+            # group(1) might be "layers.0.mlp.experts.2."
+            # group(2) might be "w1"
+            # group(3) is ".weight"
+            prefix, wN, suffix = match.groups()  # e.g. "layers.0.mlp.experts.2.", "w1", ".weight"
+            old_subproj = w_map[wN]              # map from w1->gate_proj, w2->down_proj, w3->up_proj
+
+            # That means the old key name we want is e.g. "layers.0.mlp.gate_proj.weight"
+            # But we must transform "layers.0.mlp.experts.2." -> "layers.0.mlp."
+            # So let's see if the prefix is "layers.0.mlp.experts.2."
+            # We can remove the trailing "experts.<N>." from prefix
+            # e.g. "layers.0.mlp.experts.2." -> "layers.0.mlp."
+            old_prefix = re.sub(r"experts\.\d+\.$", "", prefix)
+            # e.g. old_prefix = "layers.0.mlp."
+
+            old_key = old_prefix + old_subproj + suffix  # e.g. "layers.0.mlp.gate_proj.weight"
+
+            if old_key in old_sd:
+                merged_sd[new_k] = old_sd[old_key]  # load from old to new
+
+    return merged_sd
 
 if __name__ == "__main__":
     logits = torch.randn(1, 5)

@@ -757,7 +757,7 @@ class Model(nn.Module):
         # self.layers = nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
         if Moe_setting:
             # self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, index, num_drafts, top_k_moe) for index in range(config.num_hidden_layers)])
-            self.layers = [LlamaDecoderLayerMoE(config, 0, num_drafts, top_k_moe)]
+            self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, 0, num_drafts, top_k_moe)])
         else:
             self.layers =nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
         
