@@ -616,7 +616,7 @@ class LlamaDecoderLayerMoE(nn.Module):
         if use_cache:
             outputs += (present_key_value,)
 
-        return outputs
+        return outputs,router_logits
 
 
 
@@ -760,6 +760,7 @@ class Model(nn.Module):
         if Moe_setting:
             # self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, index, num_drafts, top_k_moe) for index in range(config.num_hidden_layers)])
             self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, 0, num_drafts, top_k_moe)])
+            #TODO-PF-NEXT: need to integrate argumennts to config
         else:
             self.layers =nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
         
@@ -868,7 +869,8 @@ class Model(nn.Module):
 
         all_hidden_states = () if output_hidden_states else None
         next_decoder_cache = () if use_cache else None
-
+        all_router_logits = []  # To store router logits from each layer
+        #TODO-PF-Check: need to revisit and comparre EaModel.forward()
         for idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
@@ -902,14 +904,15 @@ class Model(nn.Module):
                 )
 
             hidden_states = layer_outputs[0]
+            all_router_logits.append(layer_outputs[3])
 
             if use_cache:
                 next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
 
         if use_cache:
-            return hidden_states, next_decoder_cache
+            return hidden_states, next_decoder_cache, all_router_logits
 
-        return hidden_states
+        return hidden_states,all_router_logits
 
     def reset_kv(self):
         self.stable_kv = None

@@ -1,4 +1,5 @@
 import argparse
+from typing import Callable, List, Optional, Tuple, Union
 
 parser = argparse.ArgumentParser(description='sp')
 parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
@@ -39,9 +40,10 @@ train_config = {
     "grad_clip": 0.5,
     "save_freq": 5,
     #MOE setting
-    "MOE_setting":False,
+    "MOE_setting":True,
     "num_experts":3,
-    "MOE_top_k":2
+    "MOE_top_k":2,
+    "router_aux_loss_coef":0.01
 }
 import json
 from safetensors import safe_open
@@ -107,7 +109,86 @@ def list_files(path):
             file_path = os.path.join(root, file)
             datapath.append(file_path)
     return datapath
+def load_balancing_loss_func(
+    gate_logits: Union[torch.Tensor, Tuple[torch.Tensor], None],
+    num_experts: Optional[int] = None,
+    top_k=2,
+    attention_mask: Optional[torch.Tensor] = None,
+) -> Union[torch.Tensor, int]:
+    r"""
+    Computes auxiliary load balancing loss as in Switch Transformer - implemented in Pytorch.
 
+    See Switch Transformer (https://arxiv.org/abs/2101.03961) for more details. This function implements the loss
+    function presented in equations (4) - (6) of the paper. It aims at penalizing cases where the routing between
+    experts is too unbalanced.
+
+    Args:
+        gate_logits:
+            Logits from the `gate`, should be a tuple of model.config.num_hidden_layers tensors of
+            shape [batch_size X sequence_length, num_experts].
+        num_experts:
+            Number of experts
+        top_k:
+            The number of experts to route per-token, can be also interpreted as the `top-k` routing
+            parameter.
+        attention_mask (`torch.Tensor`, *optional*):
+            The attention_mask used in forward function
+            shape [batch_size X sequence_length] if not None.
+
+    Returns:
+        The auxiliary loss.
+    """
+    if gate_logits is None or not isinstance(gate_logits, tuple):
+        return 0
+
+    if isinstance(gate_logits, tuple):
+        compute_device = gate_logits[0].device
+        concatenated_gate_logits = torch.cat([layer_gate.to(compute_device) for layer_gate in gate_logits], dim=0)
+
+    routing_weights = torch.nn.functional.softmax(concatenated_gate_logits, dim=-1)
+
+    _, selected_experts = torch.topk(routing_weights, top_k, dim=-1)
+
+    expert_mask = torch.nn.functional.one_hot(selected_experts, num_experts)
+
+    if attention_mask is None:
+        # Compute the percentage of tokens routed to each experts
+        tokens_per_expert = torch.mean(expert_mask.float(), dim=0)
+
+        # Compute the average probability of routing to these experts
+        router_prob_per_expert = torch.mean(routing_weights, dim=0)
+    else:
+        batch_size, sequence_length = attention_mask.shape
+        num_hidden_layers = concatenated_gate_logits.shape[0] // (batch_size * sequence_length)
+
+        # Compute the mask that masks all padding tokens as 0 with the same shape of expert_mask
+        expert_attention_mask = (
+            attention_mask[None, :, :, None, None]
+            .expand((num_hidden_layers, batch_size, sequence_length, top_k, num_experts))
+            .reshape(-1, top_k, num_experts)
+            .to(compute_device)
+        )
+
+        # Compute the percentage of tokens routed to each experts
+        tokens_per_expert = torch.sum(expert_mask.float() * expert_attention_mask, dim=0) / torch.sum(
+            expert_attention_mask, dim=0
+        )
+
+        # Compute the mask that masks all padding tokens as 0 with the same shape of tokens_per_expert
+        router_per_expert_attention_mask = (
+            attention_mask[None, :, :, None]
+            .expand((num_hidden_layers, batch_size, sequence_length, num_experts))
+            .reshape(-1, num_experts)
+            .to(compute_device)
+        )
+
+        # Compute the average probability of routing to these experts
+        router_prob_per_expert = torch.sum(routing_weights * router_per_expert_attention_mask, dim=0) / torch.sum(
+            router_per_expert_attention_mask, dim=0
+        )
+
+    overall_loss = torch.sum(tokens_per_expert * router_prob_per_expert.unsqueeze(0))
+    return overall_loss * num_experts
 
 class AddGaussianNoise:
     def __init__(self, mean=0.0, std=0.0):
@@ -231,14 +312,21 @@ def top_accuracy(output, target, topk=(1,)):
             res.append(correct_k)
         return res
 
-def compute_loss(target, target_p, predict, loss_mask):
+def compute_loss(target, target_p, predict, loss_mask ,router_logits=None, attention_mask=None, num_experts=None, top_k=None, router_aux_loss_coef=None):
+    # Added router_logits and moe components
+
+    #Normal Eagle loss
     out_head = head(predict)
     out_logp = nn.LogSoftmax(dim=2)(out_head)
     plogp = target_p * out_logp
     ploss = -torch.sum(torch.sum(loss_mask * plogp, 2)) / (loss_mask.sum() + 1e-5)
     vloss = criterion(predict, target)
     vloss = torch.sum(torch.mean(loss_mask * vloss, 2)) / (loss_mask.sum() + 1e-5)
-    return vloss, ploss, out_head
+    #Aux load balancing loss
+    aux_loss = load_balancing_loss_func(router_logits, num_experts, top_k, attention_mask)
+    aux_loss = router_aux_loss_coef * aux_loss
+
+    return vloss, ploss, out_head, aux_loss
 
 @torch.no_grad()
 def getkacc(model, data, head, max_length=5):
@@ -296,6 +384,8 @@ def getkacc(model, data, head, max_length=5):
     return acc
 
 
+
+
 if train_config["data_noise"]:
     if train_config["noise"] == "uniform":
         aug = AddUniformNoise(std=train_config["std"])
@@ -322,7 +412,9 @@ if accelerator.is_main_process:
         os.makedirs(args.cpdir)
 
 config = EConfig.from_pretrained(train_config["config_path"])
-model = Model(config, load_emb=True, path=args.basepath)
+# model = Model(config, load_emb=True, path=args.basepath)
+model = Model(config, load_emb=True, path=args.basepath, Moe_setting=train_config["MOE_setting"], num_drafts=train_config["num_experts"],
+              top_k_moe=train_config["MOE_top_k"])
 
 criterion = nn.SmoothL1Loss(reduction="none")
 optimizer = optim.AdamW(model.parameters(), lr=train_config["lr"], betas=(train_config["b1"], train_config["b2"]))
@@ -355,14 +447,14 @@ for epoch in range(num_epochs + 1):
 
         with accelerator.accumulate(model):
             optimizer.zero_grad()
-            predict = model(data["hidden_states"], input_ids=data["input_ids"], attention_mask=data["attention_mask"])
+            predict, router_logits = model(data["hidden_states"], input_ids=data["input_ids"], attention_mask=data["attention_mask"])
             with torch.no_grad():
                 target_head = head(data["target"])
                 target_p = nn.Softmax(dim=2)(target_head)
                 target_p = target_p.detach()
             loss_mask = data["loss_mask"][:, :, None]
-            vloss, ploss, out_head = compute_loss(data["target"], target_p, predict, loss_mask)
-            loss = train_config["v_w"] * vloss + train_config["p_w"] * ploss
+            vloss, ploss, out_head, aux_loss = compute_loss(data["target"], target_p, predict, loss_mask, router_logits, data["attention_mask"], train_config["num_experts"], train_config["MOE_top_k"], train_config["router_aux_loss_coef"])
+            loss = train_config["v_w"] * vloss + train_config["p_w"] * ploss + aux_loss
             # loss.backward()
             accelerator.backward(loss)
             accelerator.clip_grad_value_(model.parameters(), train_config["grad_clip"])
@@ -384,7 +476,8 @@ for epoch in range(num_epochs + 1):
             correct += cc
         if accelerator.is_main_process and ct != 0:
             logdict = {"train/lr": optimizer.optimizer.param_groups[0]["lr"], "train/vloss": vloss.item(),
-                       "train/ploss": ploss.item(), "train/loss": loss.item(), "train/acc": cc / ct}
+                       "train/ploss": ploss.item(), "train/loss": loss.item(), "train/acc": cc / ct,
+                       "train/aux_loss": aux_loss.item()}
             for id, i in enumerate(top_3acc):
                 logdict[f'train/top_{id + 1}_acc'] = topkacc[id].item() / ct
             wandb.log(logdict)

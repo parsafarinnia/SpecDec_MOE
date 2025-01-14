@@ -114,7 +114,7 @@ class EConfig(PretrainedConfig):
         self.use_cache = use_cache
         self.rope_scaling = rope_scaling
         self._rope_scaling_validation()
-
+        # TODO: PF-Next: ADD configs heree and throughout the file
         super().__init__(
             pad_token_id=pad_token_id,
             bos_token_id=bos_token_id,

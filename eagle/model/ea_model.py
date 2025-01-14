@@ -218,6 +218,12 @@ class EaModel(nn.Module):
             return outputs, orig, hidden_states
         else:
             return outputs, hidden_states
+        #TODO-PF-Next: accordinng to Gemini need to get MLP outputs as well
+        # outputs, router_logits, hidden_states = self.ea_layer(hidden_states, input_ids, attention_mask, position_ids)
+        # if output_orig:
+        #     return outputs, orig, hidden_states, router_logits
+        # else:
+        #     return outputs, hidden_states, router_logits
 
     @torch.no_grad()
     def eagenerate(
