@@ -71,7 +71,6 @@ from transformers import get_linear_schedule_with_warmup, AutoConfig
 if accelerator.is_main_process:
     import wandb
 
-    wandb.init(project="ess", entity="yuhui-li", config=train_config)
 
 baseconfig = AutoConfig.from_pretrained(args.basepath)
 

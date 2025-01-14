@@ -71,9 +71,11 @@ class EaModel(nn.Module):
 
         else:
             self.ea_layer.diff_device = False
+        # If Moe is true only load the pre trained states without mixtral
         if not Moe_setting:
             self.ea_layer.load_state_dict(ea_layer_state_dict, strict=True)
         else:
+            #Match old pre trained model to initialize MOE mlp from Mixtral
             
             old_sd = ea_layer_state_dict  # the old dictionary from HF
             new_ea_state = self.ea_layer.state_dict()  # your new MoE layer

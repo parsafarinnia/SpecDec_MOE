@@ -474,6 +474,7 @@ class LlamaDecoderLayerMoE(nn.Module):
         self.hidden_size = config.hidden_size
         self.num_drafts = num_drafts
         self.top_k_moe = top_k_moe
+        self.router_logits = None # shape = (BS,SeqLen, Num_draft)
 
         # === 1) Self-Attention ===
         self.self_attn = LlamaAttention(config=config)
@@ -602,6 +603,7 @@ class LlamaDecoderLayerMoE(nn.Module):
         # === 4) Mixtral MoE-based Feed Forward ===
         # Instead of LlamaMLP, we do:
         hidden_states, router_logits = self.mlp(hidden_states)
+        self.router_logits = router_logits
 
         # Add the residual
         hidden_states = residual + hidden_states
