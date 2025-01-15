@@ -163,6 +163,7 @@ def get_model_answers(
         torch_dtype=torch.float16,
         low_cpu_mem_usage=True,
         # load_in_8bit=True,
+        Moe_setting = False,
         device_map="auto"
     )
 

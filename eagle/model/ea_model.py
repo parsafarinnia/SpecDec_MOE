@@ -91,7 +91,7 @@ class EaModel(nn.Module):
             # 3. Finally load it back
             self.ea_layer.load_state_dict(new_ea_state, strict=False)
 
-        # TODO: Check if you are loading the ea_layer since you are initializng the model on top
+
         self.ea_layer.to(self.base_model.dtype).to(device)
         self.ea_layer.init_tree()
 

@@ -1,24 +1,64 @@
+// {
+//     "version": "0.2.0",
+//     "configurations": [
+//       {
+//         "name": "Debug Accelerate Script",
+//         "type": "debugpy",
+//         "request": "launch",
+//         "module":"eagle.testbug.debug_flow", //"accelerate.commands.launch",
+//         "args": [
+//           // "--mixed_precision", "bf16",
+//           // "--multi_gpu",
+//           // "--module", "eagle.train.main.py",
+//           // "--tmpdir", "/home/farinneya/projects/eagle_data/sharegpt_0_67999_mufp16/",
+//           // "--cpdir", "/home/farinnneya/projects/checkpoints/"
+//         ],
+//         "console": "integratedTerminal",
+//         "justMyCode": false,
+//         "env": {
+//           "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/eagle",
+//           "CUDA_VISIBLE_DEVICES": "1"
+//         }
+//       }
+//     ]
+//   }
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Debug Accelerate Script",
-        "type": "debugpy",
-        "request": "launch",
-        "module":"eagle.testbug.debug_flow", //"accelerate.commands.launch",
-        "args": [
-          // "--mixed_precision", "bf16",
-          // "--multi_gpu",
-          // "--module", "eagle.train.main.py",
-          // "--tmpdir", "/home/farinneya/projects/eagle_data/sharegpt_0_67999_mufp16/",
-          // "--cpdir", "/home/farinnneya/projects/checkpoints/"
-        ],
-        "console": "integratedTerminal",
-        "justMyCode": false,
-        "env": {
-          "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/eagle",
-          "CUDA_VISIBLE_DEVICES": "1"
-        }
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Accelerate Script",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "eagle.testbug.debug_flow", // "accelerate.commands.launch",
+      "args": [
+        // "--mixed_precision", "bf16",
+        // "--multi_gpu",
+        // "--module", "eagle.train.main.py",
+        // "--tmpdir", "/home/farinneya/projects/eagle_data/sharegpt_0_67999_mufp16/",
+        // "--cpdir", "/home/farinnneya/projects/checkpoints/"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/eagle",
+        "CUDA_VISIBLE_DEVICES": "1"
       }
-    ]
-  }
+    },
+    {
+      "name": "Debug EAGLE Vicuna",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "eagle.evaluation.gen_ea_answer_vicuna",
+      "args": [
+        "--ea-model-path", "yuhuili/EAGLE-Vicuna-7B-v1.3",
+        "--base-model-path", "lmsys/vicuna-7b-v1.3"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/eagle",
+        "CUDA_VISIBLE_DEVICES": "1"
+      }
+    }
+  ]
+}
