@@ -1,0 +1,51 @@
+/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+The following values were not passed to `accelerate launch` and had defaults used instead:
+	`--num_processes` was set to a value of `2`
+		More than one GPU was found, enabling multi-GPU training.
+		If this was unintended please pass in `--num_processes=1`.
+	`--num_machines` was set to a value of `1`
+	`--dynamo_backend` was set to a value of `'no'`
+To avoid this warning pass in values for each of the problematic parameters or run `accelerate config`.
+/home/farinneya/miniconda3/envs/eagle2/bin/python: Error while finding module specification for 'eagle.train.main' (ModuleNotFoundError: No module named 'eagle')
+/home/farinneya/miniconda3/envs/eagle2/bin/python: Error while finding module specification for 'eagle.train.main' (ModuleNotFoundError: No module named 'eagle')
+E0116 16:53:25.467000 2026730 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 0 (pid: 2026858) of binary: /home/farinneya/miniconda3/envs/eagle2/bin/python
+Traceback (most recent call last):
+  File "/home/farinneya/miniconda3/envs/eagle2/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+  File "/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/accelerate/commands/accelerate_cli.py", line 45, in main
+    args.func(args)
+  File "/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/accelerate/commands/launch.py", line 970, in launch_command
+    multi_gpu_launcher(args)
+  File "/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/accelerate/commands/launch.py", line 646, in multi_gpu_launcher
+    distrib_run.run(args)
+  File "/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/farinneya/miniconda3/envs/eagle2/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+eagle.train.main FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-01-16_16:53:25
+  host      : lux-3-node-04
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 2026859)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-01-16_16:53:25
+  host      : lux-3-node-04
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 2026858)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

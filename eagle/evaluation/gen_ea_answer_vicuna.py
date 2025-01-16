@@ -109,7 +109,7 @@ def get_model_answers(
         # load_in_8bit=True,
         Moe_setting = False,
         num_drafts = 3,
-        top_k_moe = 2,
+        top_k_moe = 1,
         device_map="auto"
     )
 
