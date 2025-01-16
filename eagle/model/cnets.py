@@ -616,7 +616,9 @@ class LlamaDecoderLayerMoE(nn.Module):
         if use_cache:
             outputs += (present_key_value,)
 
-        return outputs,router_logits
+        outputs += (router_logits,)
+
+        return outputs
 
 
 
@@ -869,8 +871,8 @@ class Model(nn.Module):
 
         all_hidden_states = () if output_hidden_states else None
         next_decoder_cache = () if use_cache else None
-        all_router_logits = []  # To store router logits from each layer
-        #TODO-PF-Check: need to revisit and comparre EaModel.forward()
+        all_router_logits = None  # To store router logits from each layer
+        #TODO next-PF-Check: need to revisit and comparre EaModel.forward()
         for idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
@@ -903,16 +905,18 @@ class Model(nn.Module):
                     use_cache=use_cache,
                 )
 
-            hidden_states = layer_outputs[0]
-            all_router_logits.append(layer_outputs[3])
+            hidden_states = layer_outputs[0] #de
+
+            all_router_logits = layer_outputs[-1]
 
             if use_cache:
                 next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
+                #TODO PF-Next(maybe): the out put is 2 from LlamadecoderlayerMOE to heve 5 outputs!
 
         if use_cache:
             return hidden_states, next_decoder_cache, all_router_logits
 
-        return hidden_states,all_router_logits
+        return hidden_states, all_router_logits
 
     def reset_kv(self):
         self.stable_kv = None
@@ -940,10 +944,11 @@ class Model(nn.Module):
         # with Timer("draft many"):
         if hasattr(self, "stable_kv") and self.stable_kv is not None:
             kv_len = self.stable_kv[0][0].shape[2]
-            out_hidden, past_key_values = self(hidden_states, input_ids=input_ids[:, kv_len:],
+            outputs = self(hidden_states, input_ids=input_ids[:, kv_len:],
                                                past_key_values=self.stable_kv, use_cache=True)
         else:
-            out_hidden, past_key_values = self(hidden_states, input_ids=input_ids, use_cache=True)
+            outputs = self(hidden_states, input_ids=input_ids, use_cache=True)
+        out_hidden, past_key_values = outputs[0], outputs[1]
         self.stable_kv = past_key_values
         last_hidden = out_hidden[:, -1]
 
@@ -968,8 +973,9 @@ class Model(nn.Module):
             # with Timer("draft one"):
             #TODO: check which model
             
-            out_hidden, past_key_values = self(input_hidden, input_ids=input_ids, past_key_values=past_key_values,
+            outputs = self(input_hidden, input_ids=input_ids, past_key_values=past_key_values,
                                                position_ids=position_ids, use_cache=True)
+            out_hidden, past_key_values = outputs[0], outputs[1]
             len_posi += 1
 
             # with Timer("sort1"):
@@ -1127,7 +1133,7 @@ class Model(nn.Module):
                     tmp_sample_mask = sample_mask[i, single_hidden_states.shape[1] - 1]
                     if not (target_in_token == tmp_token):
                         break
-                    out_hidden = self(single_hidden_states, input_ids=single_input_ids)
+                    out_hidden = self(single_hidden_states, input_ids=single_input_ids)[0]
                     last_hidden = out_hidden[:, -1]
                     last_headout = head(last_hidden)
                     token = torch.argmax(last_headout)

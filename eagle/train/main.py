@@ -10,6 +10,40 @@ parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
 parser.add_argument('--tmpdir', type=str, default='0')
 parser.add_argument('--cpdir', type=str, default='0')
 args = parser.parse_args()
+# train_config = {
+#     "lr": args.lr,
+#     "bs": args.bs,
+#     "gradient_accumulation_steps": args.gradient_accumulation_steps,
+#     "datapath": f"{args.tmpdir}",
+#     "is_warmup": True,
+#     "num_epochs": 20,
+#     # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
+#     "num_warmup_steps": 2000,
+#     "total_steps": 800000,
+#     "p_w": 0.1,
+#     "v_w": 1.0,
+#     "head_w": 0.1,
+#     "num_workers": 2,
+#     "embeding": True,
+#     "act": "No",
+#     "data_noise": True,
+#     "noise": "uniform",
+#     "mean": 0.0,
+#     "std": 0.2,
+#     "residual": "true,norm",
+#     "max_len": 2048,
+#     # During training, truncating the training sequences means that the larger the setting, the more training data is used, and the better the effect, but it also consumes more VRAM.
+#     "config_path": args.configpath,
+#     "b1": 0.9,
+#     "b2": 0.95,
+#     "grad_clip": 0.5,
+#     "save_freq": 5,
+#     #MOE setting
+#     "MOE_setting":True,
+#     "num_experts":3,
+#     "MOE_top_k":2,
+#     "router_aux_loss_coef":0.01
+# }
 
 train_config = {
     "lr": args.lr,
@@ -17,10 +51,10 @@ train_config = {
     "gradient_accumulation_steps": args.gradient_accumulation_steps,
     "datapath": f"{args.tmpdir}",
     "is_warmup": True,
-    "num_epochs": 20,
+    "num_epochs": 1,
     # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
-    "num_warmup_steps": 2000,
-    "total_steps": 800000,
+    "num_warmup_steps": 200,
+    "total_steps": 800,
     "p_w": 0.1,
     "v_w": 1.0,
     "head_w": 0.1,
@@ -45,6 +79,7 @@ train_config = {
     "MOE_top_k":2,
     "router_aux_loss_coef":0.01
 }
+
 import json
 from safetensors import safe_open
 # from transformers import AutoModelForCausalLM, AutoTokenizer,AutoModelForSequenceClassification
@@ -72,6 +107,8 @@ from transformers import get_linear_schedule_with_warmup, AutoConfig
 
 if accelerator.is_main_process:
     import wandb
+
+    wandb.init(project="Eagle_MOE", entity="parsa-far", config=train_config)
 
 
 baseconfig = AutoConfig.from_pretrained(args.basepath)
