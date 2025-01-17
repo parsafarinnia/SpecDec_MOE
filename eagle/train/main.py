@@ -1,6 +1,6 @@
 import argparse
 from typing import Callable, List, Optional, Tuple, Union
-
+import pdb
 parser = argparse.ArgumentParser(description='sp')
 parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
 parser.add_argument('--configpath', type=str, default="config.json")
@@ -114,11 +114,14 @@ if accelerator.is_main_process:
 baseconfig = AutoConfig.from_pretrained(args.basepath)
 
 head = torch.nn.Linear(baseconfig.hidden_size, baseconfig.vocab_size, bias=False)
-
+pdb.set_trace()
 try:
+    
     with open(os.path.join(args.basepath, "model.safetensors.index.json"), "r") as f:
         index_json = json.loads(f.read())
         head_path = index_json["weight_map"]["lm_head.weight"]
+
+    
     with safe_open(os.path.join(args.basepath, head_path),
                    framework="pt",
                    device="cpu") as f:

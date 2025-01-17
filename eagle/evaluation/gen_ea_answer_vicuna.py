@@ -403,3 +403,8 @@ if __name__ == "__main__":
     )
 
     reorg_answer_file(answer_file)
+'''
+python -m eagle.eagle.evaluation.gen_ea_answer_vicuna \
+		 --ea-model-path yuhuili/EAGLE-Vicuna-7B-v1.3 \ 
+		 --base-model-path lmsys/vicuna-7b-v1.3 \
+'''
