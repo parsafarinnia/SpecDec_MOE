@@ -1,3 +1,4 @@
+
 """Generate answers with local models.
 
 Usage:
@@ -59,7 +60,6 @@ def run_eval(
     chunk_size = len(questions) // (num_gpus_total // num_gpus_per_model)  # // 2
     ans_handles = []
     for i in range(0, len(questions), chunk_size):
-
         ans_handles.append(
             get_answers_func(
                 base_model_path,
@@ -75,8 +75,6 @@ def run_eval(
                 args
             )
         )
-        if i%20 == 0:
-            print(f'PF-Check:You are in eval with i = {i}')
 
     if use_ray:
         ray.get(ans_handles)
@@ -107,7 +105,7 @@ def get_model_answers(
         torch_dtype=torch.float16,
         low_cpu_mem_usage=True,
         # load_in_8bit=True,
-        Moe_setting = False,
+        Moe_setting = True,
         num_drafts = 3,
         top_k_moe = 1,
         device_map="auto"
@@ -403,8 +401,3 @@ if __name__ == "__main__":
     )
 
     reorg_answer_file(answer_file)
-'''
-python -m eagle.eagle.evaluation.gen_ea_answer_vicuna \
-		 --ea-model-path yuhuili/EAGLE-Vicuna-7B-v1.3 \ 
-		 --base-model-path lmsys/vicuna-7b-v1.3 \
-'''

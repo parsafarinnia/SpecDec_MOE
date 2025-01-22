@@ -9,41 +9,8 @@ parser.add_argument('--bs', type=int, default=4)
 parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
 parser.add_argument('--tmpdir', type=str, default='0')
 parser.add_argument('--cpdir', type=str, default='0')
+parser.add_argument('--run_name', type=str, default="no_name")
 args = parser.parse_args()
-# train_config = {
-#     "lr": args.lr,
-#     "bs": args.bs,
-#     "gradient_accumulation_steps": args.gradient_accumulation_steps,
-#     "datapath": f"{args.tmpdir}",
-#     "is_warmup": True,
-#     "num_epochs": 20,
-#     # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
-#     "num_warmup_steps": 2000,
-#     "total_steps": 800000,
-#     "p_w": 0.1,
-#     "v_w": 1.0,
-#     "head_w": 0.1,
-#     "num_workers": 2,
-#     "embeding": True,
-#     "act": "No",
-#     "data_noise": True,
-#     "noise": "uniform",
-#     "mean": 0.0,
-#     "std": 0.2,
-#     "residual": "true,norm",
-#     "max_len": 2048,
-#     # During training, truncating the training sequences means that the larger the setting, the more training data is used, and the better the effect, but it also consumes more VRAM.
-#     "config_path": args.configpath,
-#     "b1": 0.9,
-#     "b2": 0.95,
-#     "grad_clip": 0.5,
-#     "save_freq": 5,
-#     #MOE setting
-#     "MOE_setting":True,
-#     "num_experts":3,
-#     "MOE_top_k":2,
-#     "router_aux_loss_coef":0.01
-# }
 
 train_config = {
     "lr": args.lr,
@@ -51,10 +18,10 @@ train_config = {
     "gradient_accumulation_steps": args.gradient_accumulation_steps,
     "datapath": f"{args.tmpdir}",
     "is_warmup": True,
-    "num_epochs": 1,
+    "num_epochs": 5,
     # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
-    "num_warmup_steps": 200,
-    "total_steps": 800,
+    "num_warmup_steps": 2000,
+    "total_steps": 800000,
     "p_w": 0.1,
     "v_w": 1.0,
     "head_w": 0.1,
@@ -108,15 +75,18 @@ from transformers import get_linear_schedule_with_warmup, AutoConfig
 if accelerator.is_main_process:
     import wandb
 
-    wandb.init(project="Eagle_MOE", entity="parsa-far", config=train_config)
+    wandb.init(project="Eagle_MOE",name=args.run_name , config=train_config)
 
 
 baseconfig = AutoConfig.from_pretrained(args.basepath)
 
 head = torch.nn.Linear(baseconfig.hidden_size, baseconfig.vocab_size, bias=False)
-pdb.set_trace()
+
 try:
-    
+
+    # load_model_path=os.path.join(ea_model_path, "pytorch_model.bin")
+    # if not os.path.exists(load_model_path):
+
     with open(os.path.join(args.basepath, "model.safetensors.index.json"), "r") as f:
         index_json = json.loads(f.read())
         head_path = index_json["weight_map"]["lm_head.weight"]
@@ -178,10 +148,11 @@ def load_balancing_loss_func(
     Returns:
         The auxiliary loss.
     """
-    if gate_logits is None or not isinstance(gate_logits, tuple):
+    if gate_logits is None:
         return 0
 
-    if isinstance(gate_logits, tuple):
+    if isinstance(gate_logits, torch.Tensor):
+        gate_logits = (gate_logits,)
         compute_device = gate_logits[0].device
         concatenated_gate_logits = torch.cat([layer_gate.to(compute_device) for layer_gate in gate_logits], dim=0)
 
@@ -264,7 +235,7 @@ class CustomDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        # try:
+
         data = torch.load(self.data[index])
         new_data = {}
         hidden_state = data['hidden_state'][:train_config["max_len"]][None, :]
@@ -352,7 +323,7 @@ def top_accuracy(output, target, topk=(1,)):
             res.append(correct_k)
         return res
 
-def compute_loss(target, target_p, predict, loss_mask ,router_logits=None, attention_mask=None, num_experts=None, top_k=None, router_aux_loss_coef=None):
+def compute_loss(target, target_p, predict, loss_mask ,router_logits=None, attention_mask=None, num_experts=None, top_k=None):
     # Added router_logits and moe components
 
     #Normal Eagle loss
@@ -364,7 +335,8 @@ def compute_loss(target, target_p, predict, loss_mask ,router_logits=None, atten
     vloss = torch.sum(torch.mean(loss_mask * vloss, 2)) / (loss_mask.sum() + 1e-5)
     #Aux load balancing loss
     aux_loss = load_balancing_loss_func(router_logits, num_experts, top_k, attention_mask)
-    aux_loss = router_aux_loss_coef * aux_loss
+
+
 
     return vloss, ploss, out_head, aux_loss
 
@@ -375,10 +347,10 @@ def getkacc(model, data, head, max_length=5):
             past_key_values = None
             for i in range(max_length):
                 if past_key_values != None:
-                    out_hidden, past_key_values = model(last_hidden, input_ids=token, past_key_values=past_key_values,
+                    out_hidden, past_key_values,router_logits = model(last_hidden, input_ids=token, past_key_values=past_key_values,
                                                         use_cache=True)
                 else:
-                    out_hidden, past_key_values = model(hidden_states, input_ids=input_ids, use_cache=True)
+                    out_hidden, past_key_values,router_logits = model(hidden_states, input_ids=input_ids, use_cache=True)
                 last_hidden = out_hidden[:, -1:]
                 last_headout = head(last_hidden)
                 token = torch.argmax(last_headout, dim=-1)
@@ -435,6 +407,7 @@ else:
     aug = None
 
 datapath = list_files(train_config["datapath"])
+# print(datapath)
 
 traindatapath = datapath[:int(len(datapath) * 0.95)]
 testdatapath = datapath[int(len(datapath) * 0.95):]
@@ -493,8 +466,8 @@ for epoch in range(num_epochs + 1):
                 target_p = nn.Softmax(dim=2)(target_head)
                 target_p = target_p.detach()
             loss_mask = data["loss_mask"][:, :, None]
-            vloss, ploss, out_head, aux_loss = compute_loss(data["target"], target_p, predict, loss_mask, router_logits, data["attention_mask"], train_config["num_experts"], train_config["MOE_top_k"], train_config["router_aux_loss_coef"])
-            loss = train_config["v_w"] * vloss + train_config["p_w"] * ploss + aux_loss
+            vloss, ploss, out_head, aux_loss = compute_loss(data["target"], target_p, predict, loss_mask, router_logits, data["attention_mask"], train_config["num_experts"], train_config["MOE_top_k"])
+            loss = train_config["v_w"] * vloss + train_config["p_w"] * ploss + train_config["router_aux_loss_coef"]*aux_loss
             # loss.backward()
             accelerator.backward(loss)
             accelerator.clip_grad_value_(model.parameters(), train_config["grad_clip"])
@@ -518,13 +491,22 @@ for epoch in range(num_epochs + 1):
             logdict = {"train/lr": optimizer.optimizer.param_groups[0]["lr"], "train/vloss": vloss.item(),
                        "train/ploss": ploss.item(), "train/loss": loss.item(), "train/acc": cc / ct,
                        "train/aux_loss": aux_loss.item()}
+            print("--------------")
+            print(
+    f'[TRAIN] lr={optimizer.optimizer.param_groups[0]["lr"]}, '
+    f'vloss={vloss.item()}, '
+    f'ploss={ploss.item()}, '
+    f'loss={loss.item()}, '
+    f'aux_loss={aux_loss.item()}'
+)
+
+ #TODO PF-Fixme: was aux_loss.item() --> but aux_loss is float
             for id, i in enumerate(top_3acc):
                 logdict[f'train/top_{id + 1}_acc'] = topkacc[id].item() / ct
             wandb.log(logdict)
             # for id,i in enumerate(top_3acc):
             #     wandb.log({f'train/top_{id+1}_acc':topkacc[id].item()/ct})
-
-        del ploss, vloss
+        del ploss, vloss, aux_loss
         epoch_loss += loss.item()
         num_batches += 1
 
@@ -557,13 +539,13 @@ for epoch in range(num_epochs + 1):
                     for i in range(len(acces)):
                         k_acc[i].append(acces[i])
                 predict = model(data["hidden_states"], input_ids=data["input_ids"],
-                                attention_mask=data["attention_mask"])
+                                attention_mask=data["attention_mask"])[0]
                 target_head = head(data["target"])
                 target_p = nn.Softmax(dim=2)(target_head)
                 target_p = target_p.detach()
                 loss_mask = data["loss_mask"][:, :, None]
-                vloss, ploss, out_head = compute_loss(data["target"], target_p, predict, loss_mask)
-                loss = train_config["v_w"] * vloss + train_config["p_w"] * ploss
+                vloss, ploss, out_head,aux_loss = compute_loss(data["target"], target_p, predict, loss_mask)
+                loss = train_config["v_w"] * vloss + train_config["p_w"] * ploss + train_config["router_aux_loss_coef"]*aux_loss
                 _, predicted = torch.max(out_head, 2)
                 _, target = torch.max(target_head, 2)
                 ct = loss_mask.sum().item()

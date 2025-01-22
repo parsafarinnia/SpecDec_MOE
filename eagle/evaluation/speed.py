@@ -65,8 +65,8 @@ from transformers import AutoTokenizer
 import numpy as np
 
 tokenizer=AutoTokenizer.from_pretrained("lmsys/vicuna-7b-v1.3")
-jsonl_file = "/home/farinneya/mt_bench/custom_eagle-temperature-1.0.jsonl"
-jsonl_file_base = "/home/farinneya/mt_bench/custom_eagle_topk1-temperature-1.0.jsonl"
+jsonl_file = "/home/farinneya/eagle/mt_bench/EAGLE_VANILLA-temperature-1.0.jsonl"
+jsonl_file_base = "/home/farinneya/eagle/mt_bench/EAGLE_MOE_3EXP_TOP2-temperature-1.0.jsonl"
 data = []
 with open(jsonl_file, 'r', encoding='utf-8') as file:
     for line in file:
@@ -107,6 +107,5 @@ for datapoint in data:
 
 
 
-# print('speed',np.array(speeds).mean())
-# print('speed0',np.array(speeds0).mean())
+print(f'Speed up ratio of {jsonl_file} over {jsonl_file_base}')
 print("ratio",np.array(speeds).mean()/np.array(speeds0).mean())

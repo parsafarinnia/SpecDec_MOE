@@ -27,7 +27,7 @@ from typing import List, Optional, Tuple, Union
 import torch.nn.functional as F
 import torch.utils.checkpoint
 from torch import nn
-
+import pdb
 from transformers.activations import ACT2FN
 
 
@@ -617,7 +617,7 @@ class LlamaDecoderLayerMoE(nn.Module):
             outputs += (present_key_value,)
 
         outputs += (router_logits,)
-
+        # pdb.set_trace()
         return outputs
 
 
@@ -662,10 +662,12 @@ class EagleSparseMoeBlock(nn.Module):
         # gating
         self.gate = nn.Linear(self.hidden_dim, self.num_experts, bias=False)
 
+
         self.experts = nn.ModuleList([EagleBlockSparseTop2MLP(config) for _ in range(self.num_experts)])
 
         # Jitter parameters
         self.jitter_noise = config.router_jitter_noise
+
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         """ """
