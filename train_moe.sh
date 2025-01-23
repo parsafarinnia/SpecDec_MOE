@@ -16,11 +16,11 @@ export MASTER_ADDR="$(hostname --fqdn)"
 export MASTER_PORT="$(python -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1])')"
 export RDZV_ID=$RANDOM
 echo "RDZV Endpoint is: $MASTER_ADDR:$MASTER_PORT (ID=$RDZV_ID)"
-run_name="train_moe_top2k_3exp"
+run_name="train_moe_top2k_8exp_with_jitter_21epoch"
 # 2) Other environment variables:
-export CUDA_VISIBLE_DEVICES="6,7" 
+export CUDA_VISIBLE_DEVICES="4,5,6,7" 
 export TOKENIZERS_PARALLELISM=false
-export WANDB_MODE="offline"
+export WANDB_MODE="online"
 
 accelerate launch -m \
     --main_process_port $MASTER_PORT \
