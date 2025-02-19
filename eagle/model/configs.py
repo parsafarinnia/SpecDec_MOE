@@ -93,6 +93,16 @@ class EConfig(PretrainedConfig):
         pretraining_tp=1,
         tie_word_embeddings=False,
         rope_scaling=None,
+        use_moe=False,
+        moe_intermediate_size=2816,
+        n_routed_experts=64,
+        n_shared_experts=2,
+        norm_topk_prob=False,
+        num_experts_per_tok=6,
+        scoring_func='softmax',
+        topk_method='', #TODO: for aux free. unused for now
+        seq_aux=False,
+        aux_loss_alpha=0.001,
         **kwargs,
     ):
         self.vocab_size = vocab_size
@@ -114,6 +124,17 @@ class EConfig(PretrainedConfig):
         self.use_cache = use_cache
         self.rope_scaling = rope_scaling
         self._rope_scaling_validation()
+        
+        self.use_moe = use_moe 
+        self.moe_intermediate_size = moe_intermediate_size
+        self.n_routed_experts = n_routed_experts
+        self.n_shared_experts = n_shared_experts
+        self.norm_topk_prob = norm_topk_prob
+        self.num_experts_per_tok = num_experts_per_tok 
+        self.scoring_func = scoring_func
+        self.topk_method = topk_method
+        self.seq_aux = seq_aux
+        self.aux_loss_alpha = aux_loss_alpha
 
         super().__init__(
             pad_token_id=pad_token_id,
