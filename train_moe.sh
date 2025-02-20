@@ -16,9 +16,9 @@ export MASTER_ADDR="$(hostname --fqdn)"
 export MASTER_PORT="$(python -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1])')"
 export RDZV_ID=$RANDOM
 echo "RDZV Endpoint is: $MASTER_ADDR:$MASTER_PORT (ID=$RDZV_ID)"
-run_name="train_moe_top2k_8exp_with_jitter_21epoch"
+run_name="train_moe_top2k_8exp_with_jitter_21epoch_node4"
 # 2) Other environment variables:
-export CUDA_VISIBLE_DEVICES="4,5,6,7" 
+export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7" 
 export TOKENIZERS_PARALLELISM=false
 export WANDB_MODE="online"
 
@@ -28,10 +28,11 @@ accelerate launch -m \
     --rdzv_backend static \
     --mixed_precision=bf16 \
     eagle.train.main \
-    --basepath /work/parsa-data/pre-trained-models/vicuna-7b-v1.3 \
-    --tmpdir /work/parsa-data/eagle_data/vicuna-7b-v1.3-data/sharegpt_0_67999_mufp16 \
-    --cpdir /work/parsa-data/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_${run_name} \
-    --configpath /home/farinneya/eagle/eagle/train/vicuna_7B_config.json \
+    --basepath /work/farinneya/models/Llama_3.1_8B_Instruct \
+    --tmpdir /work/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16 \
+    --cpdir /work/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_${run_name} \
+    --configpath /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json\
+    --train-config-file /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json\
     --gradient-accumulation-steps 1 \
     --bs 4\
     --run_name ${run_name} > logs/${run_name}_logs.txt 2>&1

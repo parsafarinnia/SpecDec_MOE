@@ -1,66 +1,13 @@
 import argparse
 from typing import Callable, List, Optional, Tuple, Union
 import pdb
-parser = argparse.ArgumentParser(description='sp')
-parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
-parser.add_argument('--configpath', type=str, default="config.json")
-parser.add_argument('--lr', type=float, default=3e-5)
-parser.add_argument('--bs', type=int, default=4)
-parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
-parser.add_argument('--tmpdir', type=str, default='0')
-parser.add_argument('--cpdir', type=str, default='0')
-parser.add_argument('--run_name', type=str, default="no_name")
-args = parser.parse_args()
-
-train_config = {
-    "lr": args.lr,
-    "bs": args.bs,
-    "gradient_accumulation_steps": args.gradient_accumulation_steps,
-    "datapath": f"{args.tmpdir}",
-    "is_warmup": True,
-    "num_epochs": 5,
-    # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
-    "num_warmup_steps": 2000,
-    "total_steps": 800000,
-    "p_w": 0.1,
-    "v_w": 1.0,
-    "head_w": 0.1,
-    "num_workers": 2,
-    "embeding": True,
-    "act": "No",
-    "data_noise": True,
-    "noise": "uniform",
-    "mean": 0.0,
-    "std": 0.2,
-    "residual": "true,norm",
-    "max_len": 2048,
-    # During training, truncating the training sequences means that the larger the setting, the more training data is used, and the better the effect, but it also consumes more VRAM.
-    "config_path": args.configpath,
-    "b1": 0.9,
-    "b2": 0.95,
-    "grad_clip": 0.5,
-    "save_freq": 5,
-    #MOE setting
-    "MOE_setting":True,
-    "num_experts":3,
-    "MOE_top_k":2,
-    "router_aux_loss_coef":0.01
-}
-
 import json
 from safetensors import safe_open
 # from transformers import AutoModelForCausalLM, AutoTokenizer,AutoModelForSequenceClassification
 import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 import torch
-
-torch.backends.cuda.matmul.allow_tf32 = True
-from accelerate import Accelerator
-from accelerate.utils import set_seed
-
-set_seed(0)
-accelerator = Accelerator(mixed_precision='bf16',
-                          gradient_accumulation_steps=train_config["gradient_accumulation_steps"])
+from typing import Any, Dict, List
 from ..model.cnets import Model
 from ..model.configs import EConfig
 from typing import Any, Dict, List
@@ -71,6 +18,102 @@ from tqdm import tqdm
 # import accelerate
 import numpy as np
 from transformers import get_linear_schedule_with_warmup, AutoConfig
+import sys
+torch.backends.cuda.matmul.allow_tf32 = True
+from accelerate import Accelerator
+from accelerate.utils import set_seed
+# parser = argparse.ArgumentParser(description='sp')
+# parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
+# parser.add_argument('--configpath', type=str, default="config.json")
+# parser.add_argument('--lr', type=float, default=3e-5)
+# parser.add_argument('--bs', type=int, default=4)
+# parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
+# parser.add_argument('--tmpdir', type=str, default='0')
+# parser.add_argument('--cpdir', type=str, default='0')
+# parser.add_argument('--run_name', type=str, default="no_name")
+# args = parser.parse_args()
+
+# train_config = {
+#     "lr": args.lr,
+#     "bs": args.bs,
+#     "gradient_accumulation_steps": args.gradient_accumulation_steps,
+#     "datapath": f"{args.tmpdir}",
+#     "is_warmup": True,
+#     "num_epochs": 5,
+#     # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
+#     "num_warmup_steps": 2000,
+#     "total_steps": 800000,
+#     "p_w": 0.1,
+#     "v_w": 1.0,
+#     "head_w": 0.1,
+#     "num_workers": 2,
+#     "embeding": True,
+#     "act": "No",
+#     "data_noise": True,
+#     "noise": "uniform",
+#     "mean": 0.0,
+#     "std": 0.2,
+#     "residual": "true,norm",
+#     "max_len": 2048,
+#     # During training, truncating the training sequences means that the larger the setting, the more training data is used, and the better the effect, but it also consumes more VRAM.
+#     "config_path": args.configpath,
+#     "b1": 0.9,
+#     "b2": 0.95,
+#     "grad_clip": 0.5,
+#     "save_freq": 5,
+#     #MOE setting
+#     "MOE_setting":True,
+#     "num_experts":3,
+#     "MOE_top_k":2,
+#     "router_aux_loss_coef":0.01
+# }
+parser = argparse.ArgumentParser(description="Train MOE model")
+parser.add_argument("--train-config-file", type=str, required=True,
+                    help="Path to the moe_config.json file containing all parameters.")
+parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
+parser.add_argument('--configpath', type=str, default="config.json")
+parser.add_argument('--lr', type=float, default=3e-5)
+parser.add_argument('--bs', type=int, default=4)
+parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
+parser.add_argument('--tmpdir', type=str, default='0')
+parser.add_argument('--cpdir', type=str, default='0')
+parser.add_argument('--run_name', type=str, default="no_name")
+args = parser.parse_args()
+print("PF-Check")
+print(args)
+# print(args.config_file)
+print("PF-Check2")
+with open(args.train_config_file, "r") as f:
+    train_config = json.load(f)
+
+for key, json_val in train_config.items():
+    # If the user did not specify this key on the command line, we override it
+    # with what's in the JSON. Otherwise, we keep the user-specified value.
+    # Example check: if "--lr" is NOT in sys.argv, we set `args.lr = config_data["lr"]`
+    
+    # We also need to ensure `key` is actually an attribute in args (so we skip unknown keys).
+    if hasattr(args, key):
+        # Build the CLI flag string, e.g., "--lr"
+        cli_flag = f"--{key}"
+        # Check if the user used that flag
+        if cli_flag not in " ".join(sys.argv):
+            setattr(args, key, json_val)
+
+# Now `args` is fully merged. If the user specified --lr on the CLI, it remains.
+# If not, it uses the lr from JSON. Same for basepath, run_name, etc.
+
+print("Final Merged args:")
+for k, v in vars(args).items():
+    print(f"{k} = {v}")
+
+#--------------------------------------
+
+
+
+set_seed(0)
+accelerator = Accelerator(mixed_precision='bf16',
+                          gradient_accumulation_steps=train_config["gradient_accumulation_steps"])
+
 
 if accelerator.is_main_process:
     import wandb
@@ -424,7 +467,7 @@ if accelerator.is_main_process:
     if not os.path.exists(args.cpdir):
         os.makedirs(args.cpdir)
 
-config = EConfig.from_pretrained(train_config["config_path"])
+config = EConfig.from_pretrained(train_config["configpath"])
 # model = Model(config, load_emb=True, path=args.basepath)
 model = Model(config, load_emb=True, path=args.basepath, Moe_setting=train_config["MOE_setting"], num_drafts=train_config["num_experts"],
               top_k_moe=train_config["MOE_top_k"])
