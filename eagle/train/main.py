@@ -466,7 +466,9 @@ test_loader = DataLoader(testdataset, batch_size=train_config["bs"], shuffle=Fal
 if accelerator.is_main_process:
     if not os.path.exists(args.cpdir):
         os.makedirs(args.cpdir)
-
+# with open(train_config["configpath"]) as f:
+#     config_dict = json.load(f)
+# config = EConfig.from_dict(config_dict)
 config = EConfig.from_pretrained(train_config["configpath"])
 # model = Model(config, load_emb=True, path=args.basepath)
 model = Model(config, load_emb=True, path=args.basepath, Moe_setting=train_config["MOE_setting"], num_drafts=train_config["num_experts"],
