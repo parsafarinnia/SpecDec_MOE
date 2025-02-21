@@ -538,12 +538,12 @@ for epoch in range(num_epochs + 1):
                        "train/aux_loss": aux_loss.item()}
             print("--------------")
             print(
-    f'[TRAIN] lr={optimizer.optimizer.param_groups[0]["lr"]}, '
-    f'vloss={vloss.item()}, '
-    f'ploss={ploss.item()}, '
-    f'loss={loss.item()}, '
-    f'aux_loss={aux_loss.item()}'
-)
+                f'[TRAIN] lr={optimizer.optimizer.param_groups[0]["lr"]}, '
+                f'vloss={vloss.item()}, '
+                f'ploss={ploss.item()}, '
+                f'loss={loss.item()}, '
+                f'aux_loss={aux_loss.item()}'
+            )
 
  #TODO PF-Fixme: was aux_loss.item() --> but aux_loss is float
             for id, i in enumerate(top_3acc):
@@ -577,12 +577,12 @@ for epoch in range(num_epochs + 1):
         model.eval()
 
         k_acc = [[] for i in range(5)]
-        for batch_idx, data in enumerate(tqdm(test_loader)):
+        for batch_idx, data in (tqdm(test_loader)):
             with torch.no_grad():
                 if batch_idx < 10:
                     acces = getkacc(model, data, head, max_length=5)
                     for i in range(len(acces)):
-                        k_acc[i].append(acces[i])
+                        k_acc[i].appeenumeratend(acces[i])
                 predict = model(data["hidden_states"], input_ids=data["input_ids"],
                                 attention_mask=data["attention_mask"])[0]
                 target_head = head(data["target"])
