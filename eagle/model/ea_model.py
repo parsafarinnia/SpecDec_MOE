@@ -19,7 +19,7 @@ from .kv_cache import initialize_past_key_values
 from .cnets import Model
 from .configs import EConfig
 
-
+import pdb
 
 
 
@@ -119,6 +119,7 @@ class EaModel(nn.Module):
             **kwargs,
     ):
         #assert Type=="LLaMA" or "Mixtral"
+        
         Type=AutoConfig.from_pretrained(base_model_path).architectures[0]
         if Type=='LlamaForCausalLM':
             base_model = KVLlamaForCausalLM.from_pretrained(

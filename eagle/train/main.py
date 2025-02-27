@@ -22,6 +22,7 @@ import sys
 torch.backends.cuda.matmul.allow_tf32 = True
 from accelerate import Accelerator
 from accelerate.utils import set_seed
+
 # parser = argparse.ArgumentParser(description='sp')
 # parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
 # parser.add_argument('--configpath', type=str, default="config.json")
@@ -78,6 +79,7 @@ parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
 parser.add_argument('--tmpdir', type=str, default='0')
 parser.add_argument('--cpdir', type=str, default='0')
 parser.add_argument('--run_name', type=str, default="no_name")
+parser.add_argument('--configpath-moe', type=str, default="/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json")
 args = parser.parse_args()
 print("PF-Check")
 print(args)
@@ -493,7 +495,7 @@ else:
     model, head, optimizer, train_loader, test_loader = accelerator.prepare(
         model, head, optimizer, train_loader, test_loader
     )
-# accelerator.load_state("checkpoints/state_5")
+
 for epoch in range(num_epochs + 1):
     top_3acc = [0 for _ in range(3)]
     correct = 0
@@ -630,3 +632,12 @@ for epoch in range(num_epochs + 1):
             print('Test Accuracy: {:.2f}%'.format(100 * correct / total))
             wandb.log({"test/epochacc": correct / total, "test/epochloss": epoch_loss})
             accelerator.save_state(output_dir=f"{args.cpdir}/state_{epoch}")
+            pdb.set_trace()
+            with open(args.configpath_moe, "r", encoding="utf-8") as moeconfig:
+                ea_config = json.load(moeconfig)
+            ea_config["num_experts"] = train_config["num_experts"]
+            ea_config["MOE_top_k"] = train_config["MOE_top_k"]
+            ea_config["expert_hidden_size"] = train_config["expert_hidden_size"]
+            
+            with open(f"{args.cpdir}/state_{epoch}/config.json", "w", encoding="utf-8") as outconfig:
+                json.dump(ea_config,outconfig, indent=4)
