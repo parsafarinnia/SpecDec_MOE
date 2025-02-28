@@ -88,29 +88,6 @@ print("PF-Check2")
 with open(args.train_config_file, "r") as f:
     train_config = json.load(f)
 
-for key, json_val in train_config.items():
-    # If the user did not specify this key on the command line, we override it
-    # with what's in the JSON. Otherwise, we keep the user-specified value.
-    # Example check: if "--lr" is NOT in sys.argv, we set `args.lr = config_data["lr"]`
-    
-    # We also need to ensure `key` is actually an attribute in args (so we skip unknown keys).
-    if hasattr(args, key):
-        # Build the CLI flag string, e.g., "--lr"
-        cli_flag = f"--{key}"
-        # Check if the user used that flag
-        if cli_flag not in " ".join(sys.argv):
-            setattr(args, key, json_val)
-
-# Now `args` is fully merged. If the user specified --lr on the CLI, it remains.
-# If not, it uses the lr from JSON. Same for basepath, run_name, etc.
-
-print("Final Merged args:")
-for k, v in vars(args).items():
-    print(f"{k} = {v}")
-
-#--------------------------------------
-
-
 
 set_seed(0)
 accelerator = Accelerator(mixed_precision='bf16',
@@ -497,6 +474,7 @@ else:
     )
 
 for epoch in range(num_epochs + 1):
+    pdb.set_trace()
     top_3acc = [0 for _ in range(3)]
     correct = 0
     total = 0
@@ -546,6 +524,9 @@ for epoch in range(num_epochs + 1):
                 f'loss={loss.item()}, '
                 f'aux_loss={aux_loss.item()}'
             )
+            pdb.set_trace()
+            for batch_idx, data in enumerate(tqdm(test_loader)):
+                print("PF-Check:")
 
  #TODO PF-Fixme: was aux_loss.item() --> but aux_loss is float
             for id, i in enumerate(top_3acc):
@@ -569,8 +550,8 @@ for epoch in range(num_epochs + 1):
         print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, epoch_loss))
         print('Train Accuracy: {:.2f}%'.format(100 * correct / total))
         wandb.log({"train/epochacc": correct / total, "train/epochloss": epoch_loss})
-
-    if (epoch + 1) % train_config["save_freq"]:
+    pdb.set_trace()
+    if ((epoch + 1) % train_config["save_freq"]) ==0 :
         top_3acc = [0 for _ in range(3)]
         correct = 0
         total = 0
@@ -579,7 +560,7 @@ for epoch in range(num_epochs + 1):
         model.eval()
 
         k_acc = [[] for i in range(5)]
-        for batch_idx, data in (tqdm(test_loader)):
+        for batch_idx, data in enumerate(tqdm(test_loader)):
             with torch.no_grad():
                 if batch_idx < 10:
                     acces = getkacc(model, data, head, max_length=5)
