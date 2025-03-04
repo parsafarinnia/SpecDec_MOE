@@ -6,7 +6,7 @@ python3 gen_model_answer.py --model-path lmsys/fastchat-t5-3b-v1.0 --model-id fa
 
 python -m eagle.evaluation.gen_ea_answer_llama3chat\
 		 --ea-model-path /work/farinneya/checkpoints/eagle_experiments/March_3rd_share_gpt_MOE_Eeagle_test_train_moe_test_3exp_2topk_3epoch_node10/state_14\ 
-		 --base-model-path /work/farinneya/models/Llama_3.1_8B_Instruct\
+		 --base-model-path meta-llama/Llama-3.1-8B-Instruct\
 """
 import argparse
 import json
