@@ -438,9 +438,9 @@ traindataset = CustomDataset(traindatapath, transform=aug)
 testdataset = CustomDataset(testdatapath)
 train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
                           collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
-                          pin_memory=True)
+                          pin_memory=True,drop_last=True)
 test_loader = DataLoader(testdataset, batch_size=train_config["bs"], shuffle=False,
-                         collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"], pin_memory=True)
+                         collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"], pin_memory=True,drop_last=True)
 
 if accelerator.is_main_process:
     if not os.path.exists(args.cpdir):
@@ -474,7 +474,8 @@ else:
     )
 
 for epoch in range(num_epochs + 1):
-    pdb.set_trace()
+
+
     top_3acc = [0 for _ in range(3)]
     correct = 0
     total = 0
@@ -524,9 +525,6 @@ for epoch in range(num_epochs + 1):
                 f'loss={loss.item()}, '
                 f'aux_loss={aux_loss.item()}'
             )
-            pdb.set_trace()
-            for batch_idx, data in enumerate(tqdm(test_loader)):
-                print("PF-Check:")
 
  #TODO PF-Fixme: was aux_loss.item() --> but aux_loss is float
             for id, i in enumerate(top_3acc):
@@ -550,8 +548,10 @@ for epoch in range(num_epochs + 1):
         print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, epoch_loss))
         print('Train Accuracy: {:.2f}%'.format(100 * correct / total))
         wandb.log({"train/epochacc": correct / total, "train/epochloss": epoch_loss})
-    pdb.set_trace()
+    
     if ((epoch + 1) % train_config["save_freq"]) ==0 :
+
+
         top_3acc = [0 for _ in range(3)]
         correct = 0
         total = 0
@@ -565,7 +565,7 @@ for epoch in range(num_epochs + 1):
                 if batch_idx < 10:
                     acces = getkacc(model, data, head, max_length=5)
                     for i in range(len(acces)):
-                        k_acc[i].appeenumeratend(acces[i])
+                        k_acc[i].append(acces[i])
                 predict = model(data["hidden_states"], input_ids=data["input_ids"],
                                 attention_mask=data["attention_mask"])[0]
                 target_head = head(data["target"])
@@ -613,7 +613,7 @@ for epoch in range(num_epochs + 1):
             print('Test Accuracy: {:.2f}%'.format(100 * correct / total))
             wandb.log({"test/epochacc": correct / total, "test/epochloss": epoch_loss})
             accelerator.save_state(output_dir=f"{args.cpdir}/state_{epoch}")
-            pdb.set_trace()
+
             with open(args.configpath_moe, "r", encoding="utf-8") as moeconfig:
                 ea_config = json.load(moeconfig)
             ea_config["num_experts"] = train_config["num_experts"]

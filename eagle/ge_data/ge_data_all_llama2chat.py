@@ -19,7 +19,8 @@ from datasets import load_dataset
 import json
 from fastchat.model.model_adapter import get_conversation_template
 
-bigname="/home/hongyanz/scratch/weights/llama2chat/13B"
+# bigname="/home/hongyanz/scratch/weights/llama2chat/13B"
+bigname = "/work/farinneya/checkpoints/eagle_experiments/March_3rd_share_gpt_MOE_Eeagle_test_train_moe_test_3exp_2topk_3epoch_node10/state_14"
 # bigname = "/home/lyh/weights/hf/llama/7B/"
 # smallname = "/home/lyh/weights/hf/llama/7B/"
 
