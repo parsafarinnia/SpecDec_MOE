@@ -1,0 +1,307 @@
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+The following values were not passed to `accelerate launch` and had defaults used instead:
+	`--num_processes` was set to a value of `6`
+		More than one GPU was found, enabling multi-GPU training.
+		If this was unintended please pass in `--num_processes=1`.
+	`--num_machines` was set to a value of `1`
+	`--dynamo_backend` was set to a value of `'no'`
+To avoid this warning pass in values for each of the problematic parameters or run `accelerate config`.
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.
+  _torch_pytree._register_pytree_node(
+PF-Check
+Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', run_name='train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+PF-Check2
+Final Merged args:
+train_config_file = /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json
+basepath = /work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/
+configpath = /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json
+lr = 3e-05
+bs = 4
+gradient_accumulation_steps = 1
+tmpdir = /work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16
+cpdir = /work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+run_name = train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+configpath_moe = /home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json
+PF-Check
+Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', run_name='train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+PF-Check2
+PF-CheckFinal Merged args:
+
+train_config_file = /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json
+basepath = /work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/
+configpath = /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json
+lr = 3e-05Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', run_name='train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+
+bs = 4PF-Check2
+
+gradient_accumulation_steps = 1
+tmpdir = /work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16
+cpdir = /work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+run_name = train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+configpath_moe = /home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json
+Final Merged args:
+train_config_file = /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json
+basepath = /work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/
+configpath = /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json
+lr = 3e-05
+bs = 4
+gradient_accumulation_steps = 1
+tmpdir = /work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16
+cpdir = /work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+run_name = train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+configpath_moe = /home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json
+PF-Check
+Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', run_name='train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+PF-Check2
+Final Merged args:
+train_config_file = /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json
+basepath = /work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/
+configpath = /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json
+lr = 3e-05
+bs = 4
+gradient_accumulation_steps = 1
+tmpdir = /work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16
+cpdir = /work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+run_name = train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+configpath_moe = /home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json
+PF-Check
+Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', run_name='train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+PF-Check2
+Final Merged args:
+train_config_file = /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json
+basepath = /work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/
+configpath = /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json
+lr = 3e-05
+bs = 4
+gradient_accumulation_steps = 1
+tmpdir = /work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16
+cpdir = /work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+run_name = train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+configpath_moe = /home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json
+PF-Check
+Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', run_name='train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+PF-Check2
+Final Merged args:
+train_config_file = /home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json
+basepath = /work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/
+configpath = /home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json
+lr = 3e-05
+bs = 4
+gradient_accumulation_steps = 1
+tmpdir = /work/farinneya/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16
+cpdir = /work//farinneya/farinneya/checkpoints/eagle_experiments/share_gpt_MOE_Eeagle_test_train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+run_name = train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+configpath_moe = /home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: parsafarinnia (parsafarinnia-huawei). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.18.7
+wandb: Run data is saved locally in /home/farinneya/SpecDec_MOE/wandb/run-20250303_181518-2vhfo2ig
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run train_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March
+wandb: ⭐️ View project at https://wandb.ai/parsafarinnia-huawei/Eagle_MOE
+wandb: 🚀 View run at https://wandb.ai/parsafarinnia-huawei/Eagle_MOE/runs/2vhfo2ig
+[rank4]: Traceback (most recent call last):
+[rank4]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank4]:   File "<frozen runpy>", line 88, in _run_code
+[rank4]:   File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+[rank4]:     train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+[rank4]:                               collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+[rank4]:                               pin_memory=True)
+[rank4]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+[rank4]:     sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+[rank4]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+[rank4]:     raise ValueError(
+[rank4]:         f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+[rank4]:     )
+[rank4]: ValueError: num_samples should be a positive integer value, but got num_samples=0
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:   File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+[rank3]:     train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+[rank3]:                               collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+[rank3]:                               pin_memory=True)
+[rank3]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+[rank3]:     sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+[rank3]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+[rank3]:     raise ValueError(
+[rank3]:         f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+[rank3]:     )
+[rank3]: ValueError: num_samples should be a positive integer value, but got num_samples=0
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank2]:   File "<frozen runpy>", line 88, in _run_code
+[rank2]:   File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+[rank2]:     train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+[rank2]:                               collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+[rank2]:                               pin_memory=True)
+[rank2]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+[rank2]:     sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+[rank2]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+[rank2]:     raise ValueError(
+[rank2]:         f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+[rank2]:     )
+[rank2]: ValueError: num_samples should be a positive integer value, but got num_samples=0
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank1]:   File "<frozen runpy>", line 88, in _run_code
+[rank1]:   File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+[rank1]:     train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+[rank1]:                               collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+[rank1]:                               pin_memory=True)
+[rank1]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+[rank1]:     sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+[rank1]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+[rank1]:     raise ValueError(
+[rank1]:         f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+[rank1]:     )
+[rank1]: ValueError: num_samples should be a positive integer value, but got num_samples=0
+[rank5]: Traceback (most recent call last):
+[rank5]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank5]:   File "<frozen runpy>", line 88, in _run_code
+[rank5]:   File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+[rank5]:     train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+[rank5]:                               collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+[rank5]:                               pin_memory=True)
+[rank5]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+[rank5]:     sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+[rank5]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+[rank5]:     raise ValueError(
+[rank5]:         f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+[rank5]:     )
+[rank5]: ValueError: num_samples should be a positive integer value, but got num_samples=0
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+    train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+                              collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+                              pin_memory=True)
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+    raise ValueError(
+        f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+    )
+ValueError: num_samples should be a positive integer value, but got num_samples=0
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank0]:   File "<frozen runpy>", line 88, in _run_code
+[rank0]:   File "/home/farinneya/SpecDec_MOE/eagle/train/main.py", line 462, in <module>
+[rank0]:     train_loader = DataLoader(traindataset, batch_size=train_config["bs"], shuffle=True,
+[rank0]:                               collate_fn=DataCollatorWithPadding(), num_workers=train_config["num_workers"],
+[rank0]:                               pin_memory=True)
+[rank0]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/dataloader.py", line 383, in __init__
+[rank0]:     sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+[rank0]:   File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/utils/data/sampler.py", line 165, in __init__
+[rank0]:     raise ValueError(
+[rank0]:         f"num_samples should be a positive integer value, but got num_samples={self.num_samples}"
+[rank0]:     )
+[rank0]: ValueError: num_samples should be a positive integer value, but got num_samples=0
+[1;34mwandb[0m: 🚀 View run [33mtrain_moe_top2k_3exp_with_jitter_3epoch_node10_for_Llama3.1_12PM_3March[0m at: [34mhttps://wandb.ai/parsafarinnia-huawei/Eagle_MOE/runs/2vhfo2ig[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250303_181518-2vhfo2ig/logs[0m
+[rank0]:[W303 18:15:23.240895360 ProcessGroupNCCL.cpp:1496] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+E0303 18:15:23.572000 2985868 site-packages/torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 0 (pid: 2985964) of binary: /home/farinneya/miniconda3/envs/specmoe2/bin/python
+Traceback (most recent call last):
+  File "/home/farinneya/miniconda3/envs/specmoe2/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/accelerate/commands/accelerate_cli.py", line 45, in main
+    args.func(args)
+    ~~~~~~~~~^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/accelerate/commands/launch.py", line 970, in launch_command
+    multi_gpu_launcher(args)
+    ~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/accelerate/commands/launch.py", line 646, in multi_gpu_launcher
+    distrib_run.run(args)
+    ~~~~~~~~~~~~~~~^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/distributed/run.py", line 909, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/farinneya/miniconda3/envs/specmoe2/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+eagle.train.main FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-03-03_18:15:23
+  host      : localhost
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 2985965)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2025-03-03_18:15:23
+  host      : localhost
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 2985966)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2025-03-03_18:15:23
+  host      : localhost
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 2985967)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[4]:
+  time      : 2025-03-03_18:15:23
+  host      : localhost
+  rank      : 4 (local_rank: 4)
+  exitcode  : 1 (pid: 2985968)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[5]:
+  time      : 2025-03-03_18:15:23
+  host      : localhost
+  rank      : 5 (local_rank: 5)
+  exitcode  : 1 (pid: 2985969)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-03-03_18:15:23
+  host      : localhost
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 2985964)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
