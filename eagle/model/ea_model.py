@@ -35,7 +35,7 @@ class EaModel(nn.Module):
             top_k,
             threshold,
             ea_layer_state_dict,
-            Moe_setting = False,
+            Moe_setting = True,
             num_drafts = 3,
             top_k_moe = 2
     ):
@@ -113,7 +113,7 @@ class EaModel(nn.Module):
             depth=5,
             top_k=10,
             threshold=1.0,
-            Moe_setting = False,
+            Moe_setting = True,
             num_drafts = 3,
             top_k_moe = 2,
             **kwargs,
