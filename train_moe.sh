@@ -21,7 +21,7 @@ echo "RDZV Endpoint is: $MASTER_ADDR:$MASTER_PORT (ID=$RDZV_ID)"
 run_name="PF_DEBUG_moe_test_5exp_2topk_20epoch_node15"
 date_run="March_6th"
 # 2) Other environment variables:
-export CUDA_VISIBLE_DEVICES="2,3" 
+export CUDA_VISIBLE_DEVICES="2" 
 export TOKENIZERS_PARALLELISM=false
 export WANDB_MODE="online"
 

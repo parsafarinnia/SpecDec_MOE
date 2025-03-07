@@ -602,7 +602,7 @@ class LlamaDecoderLayerMoE(nn.Module):
 class EagleBlockSparseTop2MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.expert_ffn_dim = self.expert_ffn_dim = config.MOE_configs["exoert_ffn_dim"]
+        self.expert_ffn_dim = self.expert_ffn_dim = config.MOE_configs["expert_ffn_dim"]
         self.expert_hidden_dim = config.MOE_configs["expert_hidden_size"]
 
         self.w1 = nn.Linear(self.expert_hidden_dim, self.expert_ffn_dim, bias=False) 
@@ -632,7 +632,7 @@ class EagleSparseMoeBlock(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.ffn_dim = config.intermediate_size
-        self.expert_ffn_dim = config.MOE_configs["exoert_ffn_dim"]
+        self.expert_ffn_dim = config.MOE_configs["expert_ffn_dim"]
         self.hidden_dim = config.hidden_size
         self.num_experts = config.MOE_configs["num_experts"]
         self.top_k = config.MOE_configs["MOE_top_k"]
@@ -650,15 +650,20 @@ class EagleSparseMoeBlock(nn.Module):
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         """ """
-        batch_size, sequence_length, hidden_dim = hidden_states.shape
+        pdb.set_trace()
+        batch_size, sequence_length, hidden_dim = hidden_states.shape # batch * seq_len * hidden_dim
         if self.training and self.jitter_noise > 0:
             hidden_states *= torch.empty_like(hidden_states).uniform_(1.0 - self.jitter_noise, 1.0 + self.jitter_noise)
-        hidden_states = hidden_states.view(-1, hidden_dim)
-        # router_logits: (batch * sequence_length, n_experts)
+        hidden_states = hidden_states.view(-1, hidden_dim) # (batch * hidden_dim) * hidden_dim
+        
+        #gate : hidden_dim * num_experts
+        
+        # router_logits: (batch * sequence_length) *  n_experts
         router_logits = self.gate(hidden_states)
 
-        routing_weights = F.softmax(router_logits, dim=1, dtype=torch.float)
-        routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1)
+        routing_weights = F.softmax(router_logits, dim=1, dtype=torch.float) #(batch * sequence_length) *  n_experts
+        
+        routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1) # (batch * sequence_length) * top_k_moe
         routing_weights /= routing_weights.sum(dim=-1, keepdim=True)
         # we cast back to the input dtype
         routing_weights = routing_weights.to(hidden_states.dtype)
@@ -669,12 +674,14 @@ class EagleSparseMoeBlock(nn.Module):
 
         # One hot encode the selected experts to create an expert mask
         # this will be used to easily index which expert is going to be sollicitated
-        expert_mask = torch.nn.functional.one_hot(selected_experts, num_classes=self.num_experts).permute(2, 1, 0)
+        
+        # (batch * sequence_length) * top_k_moe * num_experts -->  num_experts * top_k_moe * (batch * sequence_length)
+        expert_mask = torch.nn.functional.one_hot(selected_experts, num_classes=self.num_experts).permute(2, 1, 0) 
 
         # Loop over all available experts in the model and perform the computation on each expert
         for expert_idx in range(self.num_experts):
             expert_layer = self.experts[expert_idx]
-            idx, top_x = torch.where(expert_mask[expert_idx])
+            idx, top_x = torch.where(expert_mask[expert_idx]) #for that expert tokens assigned to it 
 
             # Index the correct hidden states and compute the expert hidden state for
             # the current expert. We need to make sure to multiply the output hidden

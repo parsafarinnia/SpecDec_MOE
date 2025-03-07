@@ -399,17 +399,11 @@ test_loader = DataLoader(testdataset, batch_size=train_config["bs"], shuffle=Fal
 if accelerator.is_main_process:
     if not os.path.exists(args.cpdir):
         os.makedirs(args.cpdir)
-moe_dict = {"MOE_configs": {
-    "MOE_setting": True,
-    "num_experts": 5,
-    "expert_hidden_size" : 1024,
-    "MOE_top_k": 2,
-    "router_aux_loss_coef": 0.01
-  }}
+
 config = EConfig.from_pretrained(train_config["configpath"]) #needs to be just draft config
-config.update(moe_dict)
-if accelerator.is_local_main_process:
-    pdb.set_trace()
+# config.update(moe_dict)
+# if accelerator.is_local_main_process:
+#     pdb.set_trace()
     
     
 print("PF-check")
