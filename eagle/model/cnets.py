@@ -469,11 +469,13 @@ class LlamaDecoderLayerMoE(nn.Module):
                             parameters for the MoE block. If not given, you can rely on
                             the existing config fields or pass them in externally.
         """
+        
         super().__init__()
         self.index = index
         self.hidden_size = config.hidden_size
-        self.num_drafts = num_drafts
-        self.top_k_moe = top_k_moe
+        self.num_drafts = config.MOE_configs["num_experts"]
+        self.top_k_moe = config.MOE_configs["MOE_top_k"]
+        self.expert_hidden_size = config.MOE_configs["expert_hidden_size"]
         self.router_logits = None # shape = (BS,SeqLen, Num_draft)
 
         # === 1) Self-Attention ===
@@ -491,27 +493,12 @@ class LlamaDecoderLayerMoE(nn.Module):
         # Instead of:
         #    self.mlp = LlamaMLP(config)
         # We create a Mixtral-based MoE block here.
-        #
-        # You can define your own config, or map the relevant fields from `config`
-        # into `MixtralConfig`. For example, if you have a custom
-        # `mixtral_config = MixtralConfig(...)` you can pass it here, or
-        # adapt `config` to the fields required by your MoE block.
+
 
         if mixtral_config is None:
-            # Minimal example of creating a Mixtral config from existing Llama config
-            # Adjust the fields to match your EEEagleBlockSparseTop2MLP, MixtralSparseMoeBlock, etc.
-            from dataclasses import dataclass
 
-            # @dataclass
-            # class DummyMixtralConfig:
-            #     hidden_size: int = config.hidden_size
-            #     intermediate_size: int = config.intermediate_size
-            #     hidden_act: str = config.hidden_act
-            #     num_local_experts: int           # example
-            #     num_experts_per_tok: int         # top-k gating (top-2)
-            #     router_jitter_noise: float = 0.0
-            #     num_drafts: int 
-            #     top_k: int
+            from dataclasses import dataclass
+            
             class DummyMixtralConfig:
                 def __init__(
                     self,
@@ -532,6 +519,7 @@ class LlamaDecoderLayerMoE(nn.Module):
                     self.router_jitter_noise = router_jitter_noise
                     self.num_drafts = num_drafts
                     self.top_k_moe = top_k_moe
+                    
 
             # Then:
             mixtral_config = DummyMixtralConfig(
@@ -544,19 +532,8 @@ class LlamaDecoderLayerMoE(nn.Module):
                 top_k_moe=top_k_moe,
             )
 
-                     # example
-                # ... add other fields needed by your MoE
 
-            # mixtral_config = DummyMixtralConfig(
-            #     num_local_experts = num_drafts,           # example
-            #     num_experts_per_tok = top_k_moe,
-            #     num_drafts = num_drafts,
-            #     top_k = top_k_moe
-            # )
-
-        # Now we instantiate our Mixtral-based MoE feed-forward.
-        #TODO: make sure this is mlp itself and not the something else
-        self.mlp = EagleSparseMoeBlock(mixtral_config)
+        self.mlp = EagleSparseMoeBlock(config)
 
     def forward(
         self,
@@ -625,12 +602,12 @@ class LlamaDecoderLayerMoE(nn.Module):
 class EagleBlockSparseTop2MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.ffn_dim = config.intermediate_size
-        self.hidden_dim = config.hidden_size
+        self.expert_ffn_dim = self.expert_ffn_dim = config.MOE_configs["exoert_ffn_dim"]
+        self.expert_hidden_dim = config.MOE_configs["expert_hidden_size"]
 
-        self.w1 = nn.Linear(self.hidden_dim, self.ffn_dim, bias=False)
-        self.w2 = nn.Linear(self.ffn_dim, self.hidden_dim, bias=False)
-        self.w3 = nn.Linear(self.hidden_dim, self.ffn_dim, bias=False)
+        self.w1 = nn.Linear(self.expert_hidden_dim, self.expert_ffn_dim, bias=False) 
+        self.w2 = nn.Linear(self.expert_ffn_dim, self.expert_hidden_dim, bias=False)
+        self.w3 = nn.Linear(self.expert_hidden_dim, self.expert_ffn_dim, bias=False)
 
         self.act_fn = ACT2FN[config.hidden_act]
 
@@ -654,10 +631,13 @@ class EagleSparseMoeBlock(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-        self.hidden_dim = config.hidden_size
         self.ffn_dim = config.intermediate_size
-        self.num_experts = config.num_drafts
-        self.top_k = config.top_k_moe
+        self.expert_ffn_dim = config.MOE_configs["exoert_ffn_dim"]
+        self.hidden_dim = config.hidden_size
+        self.num_experts = config.MOE_configs["num_experts"]
+        self.top_k = config.MOE_configs["MOE_top_k"]
+        self.expert_hidden_size = config.MOE_configs["expert_hidden_size"]
+        self.jitter_noise = config.MOE_configs["router_jitter_noise"]
 
         # gating
         self.gate = nn.Linear(self.hidden_dim, self.num_experts, bias=False)
@@ -665,8 +645,7 @@ class EagleSparseMoeBlock(nn.Module):
 
         self.experts = nn.ModuleList([EagleBlockSparseTop2MLP(config) for _ in range(self.num_experts)])
 
-        # Jitter parameters
-        self.jitter_noise = config.router_jitter_noise
+
 
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
@@ -759,12 +738,11 @@ class Model(nn.Module):
         self.depth = depth
         self.threshold = math.log(threshold)
 
-        # TODO_Solved: Change llamaDecoderLayer to EagleDecoderLayer
-        # self.layers = nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
+
         if Moe_setting:
             # self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, index, num_drafts, top_k_moe) for index in range(config.num_hidden_layers)])
             self.layers = nn.ModuleList([LlamaDecoderLayerMoE(config, 0, num_drafts, top_k_moe)])
-            #TODO-PF-NEXT: need to integrate argumennts to config
+
         else:
             self.layers =nn.ModuleList([LlamaDecoderLayer(config, index) for index in range(config.num_hidden_layers)])
         
@@ -878,7 +856,6 @@ class Model(nn.Module):
         for idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
-                #TODO-Q: what is all_hidden_states and why is it summed?
 
             past_key_value = past_key_values[idx] if past_key_values is not None else None
 

@@ -23,51 +23,6 @@ torch.backends.cuda.matmul.allow_tf32 = True
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 
-# parser = argparse.ArgumentParser(description='sp')
-# parser.add_argument('--basepath', type=str, default='/home/lyh/weights/hf/vicuna_v13/7B/')
-# parser.add_argument('--configpath', type=str, default="config.json")
-# parser.add_argument('--lr', type=float, default=3e-5)
-# parser.add_argument('--bs', type=int, default=4)
-# parser.add_argument('--gradient-accumulation-steps', type=int, default=1)
-# parser.add_argument('--tmpdir', type=str, default='0')
-# parser.add_argument('--cpdir', type=str, default='0')
-# parser.add_argument('--run_name', type=str, default="no_name")
-# args = parser.parse_args()
-
-# train_config = {
-#     "lr": args.lr,
-#     "bs": args.bs,
-#     "gradient_accumulation_steps": args.gradient_accumulation_steps,
-#     "datapath": f"{args.tmpdir}",
-#     "is_warmup": True,
-#     "num_epochs": 5,
-#     # Depending on your data and model size, the larger the model, the higher the sample efficiency. We recommend setting it between 20-40.
-#     "num_warmup_steps": 2000,
-#     "total_steps": 800000,
-#     "p_w": 0.1,
-#     "v_w": 1.0,
-#     "head_w": 0.1,
-#     "num_workers": 2,
-#     "embeding": True,
-#     "act": "No",
-#     "data_noise": True,
-#     "noise": "uniform",
-#     "mean": 0.0,
-#     "std": 0.2,
-#     "residual": "true,norm",
-#     "max_len": 2048,
-#     # During training, truncating the training sequences means that the larger the setting, the more training data is used, and the better the effect, but it also consumes more VRAM.
-#     "config_path": args.configpath,
-#     "b1": 0.9,
-#     "b2": 0.95,
-#     "grad_clip": 0.5,
-#     "save_freq": 5,
-#     #MOE setting
-#     "MOE_setting":True,
-#     "num_experts":3,
-#     "MOE_top_k":2,
-#     "router_aux_loss_coef":0.01
-# }
 parser = argparse.ArgumentParser(description="Train MOE model")
 parser.add_argument("--train-config-file", type=str, required=True,
                     help="Path to the moe_config.json file containing all parameters.")
@@ -83,7 +38,6 @@ parser.add_argument('--configpath-moe', type=str, default="/home/farinneya/SpecD
 args = parser.parse_args()
 print("PF-Check")
 print(args)
-# print(args.config_file)
 print("PF-Check2")
 with open(args.train_config_file, "r") as f:
     train_config = json.load(f)
@@ -103,7 +57,7 @@ if accelerator.is_main_process:
 baseconfig = AutoConfig.from_pretrained(args.basepath)
 
 head = torch.nn.Linear(baseconfig.hidden_size, baseconfig.vocab_size, bias=False)
-
+   
 try:
 
     # load_model_path=os.path.join(ea_model_path, "pytorch_model.bin")
@@ -445,13 +399,23 @@ test_loader = DataLoader(testdataset, batch_size=train_config["bs"], shuffle=Fal
 if accelerator.is_main_process:
     if not os.path.exists(args.cpdir):
         os.makedirs(args.cpdir)
-# with open(train_config["configpath"]) as f:
-#     config_dict = json.load(f)
-# config = EConfig.from_dict(config_dict)
-config = EConfig.from_pretrained(train_config["configpath"])
-# model = Model(config, load_emb=True, path=args.basepath)
+moe_dict = {"MOE_configs": {
+    "MOE_setting": True,
+    "num_experts": 5,
+    "expert_hidden_size" : 1024,
+    "MOE_top_k": 2,
+    "router_aux_loss_coef": 0.01
+  }}
+config = EConfig.from_pretrained(train_config["configpath"]) #needs to be just draft config
+config.update(moe_dict)
+if accelerator.is_local_main_process:
+    pdb.set_trace()
+    
+    
+print("PF-check")
 model = Model(config, load_emb=True, path=args.basepath, Moe_setting=train_config["MOE_setting"], num_drafts=train_config["num_experts"],
               top_k_moe=train_config["MOE_top_k"])
+
 
 criterion = nn.SmoothL1Loss(reduction="none")
 optimizer = optim.AdamW(model.parameters(), lr=train_config["lr"], betas=(train_config["b1"], train_config["b2"]))

@@ -1,7 +1,13 @@
 {
-  "architectures": ["LlamaForCausalLM"],
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
   "bos_token_id": 128000,
-  "eos_token_id": [128001, 128008, 128009],
+  "eos_token_id": [
+    128001,
+    128008,
+    128009
+    ],
   "hidden_act": "silu",
   "hidden_size": 4096,
   "initializer_range": 0.02,
@@ -23,5 +29,15 @@
   "attention_dropout": 0.0,
   "mlp_bias": false,
   "pretraining_tp": 1,
-  "rope_scaling": {"factor": 8.0, "type": "dynamic"}
+  "rope_scaling": {"factor": 8.0, "type": "dynamic"},
+  "MOE_configs": {
+    "MOE_setting": true,
+    "num_experts": 5,
+    "expert_hidden_size" : 1024,
+    "expert_ffn_dim": 4096,
+    "MOE_top_k": 2,
+    "router_aux_loss_coef": 0.01,
+    "router_jitter_noise" :  0.001
+
+  }
 }

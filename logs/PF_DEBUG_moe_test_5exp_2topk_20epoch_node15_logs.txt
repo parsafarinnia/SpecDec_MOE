@@ -1,0 +1,161 @@
+The following values were not passed to `accelerate launch` and had defaults used instead:
+	`--num_processes` was set to a value of `2`
+		More than one GPU was found, enabling multi-GPU training.
+		If this was unintended please pass in `--num_processes=1`.
+	`--num_machines` was set to a value of `1`
+	`--dynamo_backend` was set to a value of `'no'`
+To avoid this warning pass in values for each of the problematic parameters or run `accelerate config`.
+PF-CheckPF-Check
+
+Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/models/Llama_3.1_8B_Instruct', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work/farinneya/checkpoints/eagle_experiments/March_6th_share_gpt_MOE_Eeagle_test_PF_DEBUG_moe_test_5exp_2topk_20epoch_node15', run_name='PF_DEBUG_moe_test_5exp_2topk_20epoch_node15', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')Namespace(train_config_file='/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json', basepath='/work/farinneya/models/Llama_3.1_8B_Instruct', configpath='/home/farinneya/SpecDec_MOE/eagle/train/model_configs/LLaMA3.1-Instruct-8B.json', lr=3e-05, bs=4, gradient_accumulation_steps=1, tmpdir='/work/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16', cpdir='/work/farinneya/checkpoints/eagle_experiments/March_6th_share_gpt_MOE_Eeagle_test_PF_DEBUG_moe_test_5exp_2topk_20epoch_node15', run_name='PF_DEBUG_moe_test_5exp_2topk_20epoch_node15', configpath_moe='/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json')
+
+PF-Check2PF-Check2
+
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: parsafarinnia (parsafarinnia-huawei). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.18.7
+wandb: Run data is saved locally in /home/farinneya/SpecDec_MOE/wandb/run-20250307_191637-k16ifd70
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run PF_DEBUG_moe_test_5exp_2topk_20epoch_node15
+wandb: ⭐️ View project at https://wandb.ai/parsafarinnia-huawei/Eagle_MOE
+wandb: 🚀 View run at https://wandb.ai/parsafarinnia-huawei/Eagle_MOE/runs/k16ifd70
+PF-check
+> /home/farinneya/SpecDec_MOE/eagle/train/main.py(415)<module>()
+-> print("PF-check")
+(Pdb) > /home/farinneya/SpecDec_MOE/eagle/model/cnets.py(481)__init__()
+-> self.self_attn = LlamaAttention(config=config)
+(Pdb) PF-check
+> /home/farinneya/SpecDec_MOE/eagle/model/cnets.py(481)__init__()
+-> self.self_attn = LlamaAttention(config=config)
+(Pdb)   0%|          | 0/17062 [00:00<?, ?it/s]  0%|          | 0/17062 [00:00<?, ?it/s]/home/farinneya/SpecDec_MOE/eagle/train/main.py:215: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  data = torch.load(self.data[index])
+/home/farinneya/SpecDec_MOE/eagle/train/main.py:215: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  data = torch.load(self.data[index])
+/home/farinneya/SpecDec_MOE/eagle/train/main.py:215: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  data = torch.load(self.data[index])
+/home/farinneya/SpecDec_MOE/eagle/train/main.py:215: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  data = torch.load(self.data[index])
+/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py:632: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py:632: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+--------------
+[TRAIN] lr=3.0000000000000004e-08, vloss=1.569190263748169, ploss=12.130227088928223, loss=2.8034331798553467, aux_loss=2.122023582458496
+  0%|          | 1/17062 [00:02<11:21:16,  2.40s/it]  0%|          | 1/17062 [00:02<11:20:01,  2.39s/it]--------------
+[TRAIN] lr=6.000000000000001e-08, vloss=1.5757315158843994, ploss=12.054452896118164, loss=2.8020942211151123, aux_loss=2.0917322635650635
+  0%|          | 2/17062 [00:02<6:19:57,  1.34s/it]   0%|          | 2/17062 [00:02<6:18:58,  1.33s/it] --------------
+[TRAIN] lr=9e-08, vloss=1.540291428565979, ploss=12.220006942749023, loss=2.7836620807647705, aux_loss=2.1369831562042236
+  0%|          | 3/17062 [00:03<5:01:39,  1.06s/it]  0%|          | 3/17062 [00:03<5:00:36,  1.06s/it]  0%|          | 4/17062 [00:04<4:20:40,  1.09it/s]--------------
+[TRAIN] lr=1.2000000000000002e-07, vloss=1.5910345315933228, ploss=12.017742156982422, loss=2.813875675201416, aux_loss=2.106692314147949
+  0%|          | 4/17062 [00:04<4:21:41,  1.09it/s]  0%|          | 5/17062 [00:04<3:45:40,  1.26it/s]--------------
+[TRAIN] lr=1.5000000000000002e-07, vloss=1.5909008979797363, ploss=12.145675659179688, loss=2.8264501094818115, aux_loss=2.0981435775756836
+  0%|          | 5/17062 [00:05<3:47:38,  1.25it/s]--------------
+[TRAIN] lr=1.8e-07, vloss=1.5922571420669556, ploss=12.073853492736816, loss=2.820472240447998, aux_loss=2.0829708576202393
+  0%|          | 6/17062 [00:05<3:27:43,  1.37it/s]  0%|          | 6/17062 [00:05<3:28:20,  1.36it/s]  0%|          | 7/17062 [00:06<3:10:13,  1.49it/s]--------------
+[TRAIN] lr=2.1e-07, vloss=1.5698113441467285, ploss=11.921713829040527, loss=2.7825052738189697, aux_loss=2.052234411239624
+  0%|          | 7/17062 [00:06<3:12:09,  1.48it/s]W0307 19:17:16.150000 2577257 site-packages/torch/distributed/elastic/agent/server/api.py:704] Received 2 death signal, shutting down workers
+W0307 19:17:16.151000 2577257 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 2577573 closing signal SIGINT
+
+Program interrupted. (Use 'cont' to resume).W0307 19:17:16.151000 2577257 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 2577574 closing signal SIGINT
+
+
+Program interrupted. (Use 'cont' to resume).
+
+Program interrupted. (Use 'cont' to resume).
+
+Program interrupted. (Use 'cont' to resume).
+
+Program interrupted. (Use 'cont' to resume).
+> /home/farinneya/SpecDec_MOE/eagle/train/main.py(472)<module>()
+-> cc = ((predicted == target) * loss_mask.squeeze()).sum().item()
+(Pdb) 
+Program interrupted. (Use 'cont' to resume).
+> /home/farinneya/SpecDec_MOE/eagle/train/main.py(472)<module>()
+-> cc = ((predicted == target) * loss_mask.squeeze()).sum().item()
+(Pdb) --------------
+[TRAIN] lr=2.4000000000000003e-07, vloss=1.6121307611465454, ploss=11.994976997375488, loss=2.832674741744995, aux_loss=2.104644536972046
+  0%|          | 8/17062 [00:07<4:14:46,  1.12it/s]> /home/farinneya/miniconda3/envs/specmoe/lib/python3.12/selectors.py(418)select()
+-> for fd, event in fd_event_list:
+(Pdb) 
+Process Process-2:
+Traceback (most recent call last):
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/utils/data/_utils/worker.py", line 317, in _worker_loop
+    r = index_queue.get(timeout=MP_STATUS_CHECK_INTERVAL)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/multiprocessing/queues.py", line 113, in get
+    if not self._poll(timeout):
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/multiprocessing/connection.py", line 257, in poll
+    return self._poll(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/multiprocessing/connection.py", line 440, in _poll
+    r = wait([self], timeout)
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/multiprocessing/connection.py", line 1136, in wait
+    ready = selector.select(timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/selectors.py", line 418, in select
+    for fd, event in fd_event_list:
+                     ^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/bdb.py", line 100, in trace_dispatch
+    return self.dispatch_line(frame)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/bdb.py", line 125, in dispatch_line
+    if self.quitting: raise BdbQuit
+                      ^^^^^^^^^^^^^
+bdb.BdbQuit
+W0307 19:17:19.124000 2577257 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 2577573 closing signal SIGTERM
+W0307 19:17:19.125000 2577257 site-packages/torch/distributed/elastic/multiprocessing/api.py:897] Sending process 2577574 closing signal SIGTERM
+Traceback (most recent call last):
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/agent/server/api.py", line 696, in run
+    result = self._invoke_run(role)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/agent/server/api.py", line 855, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 84, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2577257 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/farinneya/miniconda3/envs/specmoe/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/accelerate/commands/accelerate_cli.py", line 48, in main
+    args.func(args)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/accelerate/commands/launch.py", line 1190, in launch_command
+    multi_gpu_launcher(args)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/accelerate/commands/launch.py", line 808, in multi_gpu_launcher
+    distrib_run.run(args)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 260, in launch_agent
+    result = agent.run()
+             ^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/metrics/api.py", line 137, in wrapper
+    result = f(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/agent/server/api.py", line 705, in run
+    self._shutdown(e.sigval)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 365, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 572, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 909, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/subprocess.py", line 1266, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/subprocess.py", line 2055, in _wait
+    time.sleep(delay)
+  File "/home/farinneya/miniconda3/envs/specmoe/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 84, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2577257 got signal: 2
