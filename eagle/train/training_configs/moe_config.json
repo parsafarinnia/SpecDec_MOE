@@ -1,8 +1,8 @@
 {
     "lr": 3e-5,
-    "bs": 4,
+    "bs": 3,
     "gradient_accumulation_steps": 1,
-    "datapath": "/work/farinneya/eagle_data_llama3_8B/sharegpt_0_67999_mufp16",
+    "datapath": "/work/farinneya/eagle_data_Llama3.1_8B_instruct/sharegpt_0_67999_mufp16",
     "is_warmup": true,
     "num_epochs": 20,
     "num_warmup_steps": 2000,
@@ -19,16 +19,16 @@
     "std": 0.2,
     "residual": "true,norm",
     "max_len": 2048,
-    "train_config_file": "/home/farinneya/SpecDec_MOE/eagle/train/training_configs/moe_config.json",
-    "configpath": "/home/farinneya/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json",
+    "train_config_file": "/home/parsa/SpecDec_MOE/eagle/train/training_configs/moe_config.json",
+    "configpath": "/home/parsa/SpecDec_MOE/eagle/train/model_congifs/llama3.1_8B_instruct_moe_config.json",
     "b1": 0.9,
     "b2": 0.95,
     "grad_clip": 1,
     "save_freq": 5,
     "MOE_setting": true,
-    "num_experts": 5,
+    "num_experts": 16,
     "expert_hidden_size" : 1024,
     "MOE_top_k": 2,
-    "router_aux_loss_coef": 0.01
+    "router_aux_loss_coef": 0.5
   }
   

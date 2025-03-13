@@ -26,6 +26,8 @@ import math
 from typing import List, Optional, Tuple, Union
 import torch.nn.functional as F
 import torch.utils.checkpoint
+from accelerate import Accelerator
+from accelerate.utils import set_seed
 from torch import nn
 import pdb
 from transformers.activations import ACT2FN
@@ -473,10 +475,11 @@ class LlamaDecoderLayerMoE(nn.Module):
         super().__init__()
         self.index = index
         self.hidden_size = config.hidden_size
-        self.num_drafts = config.MOE_configs["num_experts"]
-        self.top_k_moe = config.MOE_configs["MOE_top_k"]
-        self.expert_hidden_size = config.MOE_configs["expert_hidden_size"]
-        self.router_logits = None # shape = (BS,SeqLen, Num_draft)
+        if hasattr(config, "MOE_configs"):
+            self.num_drafts = config.MOE_configs["num_experts"]
+            self.top_k_moe = config.MOE_configs["MOE_top_k"]
+            self.expert_hidden_size = config.MOE_configs["expert_hidden_size"]
+            self.router_logits = None # shape = (BS,SeqLen, Num_draft)
 
         # === 1) Self-Attention ===
         self.self_attn = LlamaAttention(config=config)
@@ -594,13 +597,14 @@ class LlamaDecoderLayerMoE(nn.Module):
             outputs += (present_key_value,)
 
         outputs += (router_logits,)
-        # pdb.set_trace()
+
         return outputs
 
 
 
 class EagleBlockSparseTop2MLP(nn.Module):
     def __init__(self, config):
+        
         super().__init__()
         self.expert_ffn_dim = self.expert_ffn_dim = config.MOE_configs["expert_ffn_dim"]
         self.expert_hidden_dim = config.MOE_configs["expert_hidden_size"]
@@ -650,7 +654,7 @@ class EagleSparseMoeBlock(nn.Module):
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         """ """
-        pdb.set_trace()
+
         batch_size, sequence_length, hidden_dim = hidden_states.shape # batch * seq_len * hidden_dim
         if self.training and self.jitter_noise > 0:
             hidden_states *= torch.empty_like(hidden_states).uniform_(1.0 - self.jitter_noise, 1.0 + self.jitter_noise)
@@ -744,6 +748,7 @@ class Model(nn.Module):
         self.total_tokens = total_tokens - 1
         self.depth = depth
         self.threshold = math.log(threshold)
+
 
 
         if Moe_setting:

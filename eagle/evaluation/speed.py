@@ -64,9 +64,9 @@ import json
 from transformers import AutoTokenizer
 import numpy as np
 
-tokenizer=AutoTokenizer.from_pretrained("lmsys/vicuna-7b-v1.3")
-jsonl_file = "/home/farinneya/eagle/mt_bench/EAGLE_VANILLA-temperature-1.0.jsonl"
-jsonl_file_base = "/home/farinneya/eagle/mt_bench/EAGLE_MOE_3EXP_TOP2-temperature-1.0.jsonl"
+tokenizer=AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+jsonl_file = "/home/parsa/SpecDec_MOE/mt_bench/llama38b2_40-MOE-topk2-Llama3.1-8B-16exp-0.0.jsonl"
+jsonl_file_base = "/home/parsa/SpecDec_MOE/mt_bench/llama38b2_40-NONEMOE-llama3-0.0.jsonl"
 data = []
 with open(jsonl_file, 'r', encoding='utf-8') as file:
     for line in file:
@@ -76,11 +76,13 @@ with open(jsonl_file, 'r', encoding='utf-8') as file:
 
 
 speeds=[]
+accept_lengths_list = []
 for datapoint in data:
     qid=datapoint["question_id"]
     answer=datapoint["choices"][0]['turns']
     tokens=sum(datapoint["choices"][0]['new_tokens'])
     times = sum(datapoint["choices"][0]['wall_time'])
+    accept_lengths_list.extend(datapoint["choices"][0]['accept_lengths'])
     speeds.append(tokens/times)
 
 
@@ -94,6 +96,7 @@ with open(jsonl_file_base, 'r', encoding='utf-8') as file:
 total_time=0
 total_token=0
 speeds0=[]
+accept_lengths_list0 = []
 for datapoint in data:
     qid=datapoint["question_id"]
     answer=datapoint["choices"][0]['turns']
@@ -101,11 +104,12 @@ for datapoint in data:
     for i in answer:
         tokens += (len(tokenizer(i).input_ids) - 1)
     times = sum(datapoint["choices"][0]['wall_time'])
+    accept_lengths_list0.extend(datapoint["choices"][0]['accept_lengths'])
     speeds0.append(tokens / times)
     total_time+=times
     total_token+=tokens
 
-
-
+print("#Mean accepted tokens NON MOE: ", np.mean(accept_lengths_list0))
+print("#Mean accepted tokens MOE: ", np.mean(accept_lengths_list))
 print(f'Speed up ratio of {jsonl_file} over {jsonl_file_base}')
 print("ratio",np.array(speeds).mean()/np.array(speeds0).mean())

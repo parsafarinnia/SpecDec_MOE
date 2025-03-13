@@ -32,9 +32,9 @@
   "rope_scaling": {"factor": 8.0, "type": "dynamic"},
   "MOE_configs": {
     "MOE_setting": true,
-    "num_experts": 5,
-    "expert_hidden_size" : 1024,
-    "expert_ffn_dim": 4096,
+    "num_experts": 16,
+    "expert_hidden_size" : 4096,
+    "expert_ffn_dim": 7168,
     "MOE_top_k": 2,
     "router_aux_loss_coef": 0.01,
     "router_jitter_noise" :  0.001

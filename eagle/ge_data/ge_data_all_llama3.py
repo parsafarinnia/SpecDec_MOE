@@ -1,3 +1,8 @@
+
+
+"""
+python -m eagle.ge_data.allocation --outdir /work/farinneya/moe_data_train
+"""
 import argparse
 
 
@@ -10,7 +15,7 @@ parser.add_argument('--outdir', type=str, default='outdir0')
 args = parser.parse_args()
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_index)[1:-1]
+os.environ["CUDA_VISIBLE_DEVICES"] = "2,3,4,5,6,7" #str(args.gpu_index)[1:-1]
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
@@ -19,7 +24,7 @@ from datasets import load_dataset
 # bigname = "/home/lyh/weights/hf/llama3chat/8B/"
 #bigname = "/home/lyh/weights/hf/llama2chat/7B/"
 # bigname = "meta-llama/Meta-Llama-3-8B-Instruct"
-bigname = "/work/farinneya/checkpoints/eagle_experiments/March_3rd_share_gpt_MOE_Eeagle_test_train_moe_test_3exp_2topk_3epoch_node10/state_14"
+bigname = "/work/farinneya/models/Llama_3.1_8B_Instruct/"
 
 
 

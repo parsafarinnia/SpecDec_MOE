@@ -8,7 +8,7 @@ import os
 repo_id = "meta-llama/Meta-Llama-3-8B-Instruct"  # e.g., "meta/Llama3-8B" or another valid ID
 
 # Define the directory where the model will be stored.
-local_dir = "/work/farinneya/farinneya/models/Llama_3.1_8B_Instruct/"
+local_dir = "/work/farinneya/models/Llama_3.1_8B_Instruct/"
 
 # Download the repository snapshot locally.
 print("Downloading Llama3 8B...")

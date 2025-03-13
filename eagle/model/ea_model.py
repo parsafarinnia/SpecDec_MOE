@@ -35,7 +35,7 @@ class EaModel(nn.Module):
             top_k,
             threshold,
             ea_layer_state_dict,
-            Moe_setting = True,
+            Moe_setting = False,
             num_drafts = 3,
             top_k_moe = 2
     ):
@@ -47,9 +47,7 @@ class EaModel(nn.Module):
         self.vocab_size = base_model.lm_head.weight.shape[0]
         self.base_model_name_or_path = base_model_name_or_path
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model_name_or_path,use_fast=False)
-        self.MOE_setting = Moe_setting
-        self.num_drafts = num_drafts
-        self.top_k_moe = top_k_moe
+
         config = EConfig.from_pretrained(ea_model_path)
         with open(ea_model_path,"r") as f:
             con=json.loads(f.read())
@@ -58,7 +56,18 @@ class EaModel(nn.Module):
         except:
             bias=True
 
-        self.ea_layer = Model(config,bias=bias,total_tokens=total_token,depth=depth,top_k=top_k,threshold=threshold,Moe_setting=Moe_setting,num_drafts=num_drafts,top_k_moe=top_k_moe)
+        if hasattr(config, "MOE_configs"):
+            self.MOE_setting = Moe_setting
+            self.num_drafts = num_drafts
+            self.top_k_moe = top_k_moe
+        else:
+            self.MOE_setting = False
+            self.num_drafts = 0
+            self.top_k_moe = 0
+
+        
+        
+        self.ea_layer = Model(config,bias=bias,total_tokens=total_token,depth=depth,top_k=top_k,threshold=threshold,Moe_setting=self.MOE_setting,num_drafts=num_drafts,top_k_moe=top_k_moe)
         low_memory=False
 
         device = base_model.model.layers[-1].self_attn.q_proj.weight.device
@@ -201,6 +210,7 @@ class EaModel(nn.Module):
             past_key_values=None,
             output_orig=False,
             position_ids=None,
+            logits_processor=None
     ):
 
         with torch.inference_mode():

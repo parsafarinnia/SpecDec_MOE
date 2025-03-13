@@ -11,6 +11,7 @@ import torch
 # from transformers import LlamaTokenizer
 # tokenizer=LlamaTokenizer.from_pretrained("/home/lyh/weights/hf/vicuna_v13/7B/")
 
+import pdb
 TOPK = 10  # topk for sparse tree
 
 from transformers.generation.logits_process import (
@@ -96,6 +97,7 @@ def generate_tree_buffers(tree_choices, device="cuda"):
         return sort_keys
     with Timer("sort"):
 
+
         sorted_tree_choices = sorted(tree_choices, key=lambda x: (len(x), x))
         tree_len = len(sorted_tree_choices) + 1
 
@@ -144,6 +146,7 @@ def generate_tree_buffers(tree_choices, device="cuda"):
                         b = []
                 else:
                     parent = cur_parent
+
                 tree_indices[start + j + 1] = cur_tree_choice[-1] + TOPK * (i + bias) + 1
                 p_indices[start + j] = inlayer_bias
                 if len(b) > 0:
@@ -230,25 +233,31 @@ def initialize_tree0(input_ids, model, past_key_values, logits_processor):
     #     return draft_tokens, retrieve_indices,tree_mask,tree_position_ids, hidden_states, token
     return draft_tokens, retrieve_indices,tree_mask,tree_position_ids, logits, hidden_state, sample_token
 
-def initialize_tree(input_ids, model, past_key_values, logits_processor):
+# def initialize_tree(input_ids, model, past_key_values, logits_processor):
     
-    outputs, orig, hidden_states = model(
-        input_ids, past_key_values=past_key_values, output_orig=True
+#     outputs, orig, hidden_states = model(
+#         input_ids, past_key_values=past_key_values, output_orig=True
+#     )
+
+#     if logits_processor is not None:
+#         logits = orig[:, -1]
+#         logits = logits_processor(None, logits)
+#         probabilities = torch.nn.functional.softmax(logits, dim=1)
+#         token = torch.multinomial(probabilities, 1)
+#     else:
+#         token = torch.argmax(orig[:, -1])
+#         token = token[None, None]
+#     input_ids = torch.cat((input_ids, token.to(input_ids.device)), dim=1)
+#     # Clone the output hidden states
+
+#     draft_tokens, retrieve_indices,tree_mask,tree_position_ids = model.ea_layer.topK_genrate(hidden_states, input_ids, model.base_model.lm_head,logits_processor)
+#     return draft_tokens, retrieve_indices,tree_mask,tree_position_ids, orig, hidden_states, token
+def initialize_tree(input_ids, model, tree_attn_mask, past_key_values, logits_processor):
+    tree_logits, outputs, logits, hidden_state, sample_token = model(
+        input_ids, past_key_values=past_key_values, output_orig=True, logits_processor=logits_processor
     )
-
-    if logits_processor is not None:
-        logits = orig[:, -1]
-        logits = logits_processor(None, logits)
-        probabilities = torch.nn.functional.softmax(logits, dim=1)
-        token = torch.multinomial(probabilities, 1)
-    else:
-        token = torch.argmax(orig[:, -1])
-        token = token[None, None]
-    input_ids = torch.cat((input_ids, token.to(input_ids.device)), dim=1)
-    # Clone the output hidden states
-
-    draft_tokens, retrieve_indices,tree_mask,tree_position_ids = model.ea_layer.topK_genrate(hidden_states, input_ids, model.base_model.lm_head,logits_processor)
-    return draft_tokens, retrieve_indices,tree_mask,tree_position_ids, orig, hidden_states, token
+    model.base_model.model.tree_mask = tree_attn_mask
+    return tree_logits, logits, hidden_state, sample_token
 
 
 def reset_tree_mode(

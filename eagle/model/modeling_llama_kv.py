@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import torch.utils.checkpoint
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
-from .modeling_rope_utils import ROPE_INIT_FUNCTIONS
+# from .modeling_rope_utils import ROPE_INIT_FUNCTIONS
 # [MODIFIED] Import from transformer library
 from transformers.activations import ACT2FN
 from transformers.modeling_outputs import (
@@ -576,7 +576,8 @@ class LlamaAttention(nn.Module):
                     scaling_factor=scaling_factor,
                 )
             elif scaling_type == "llama3":
-                self.rotary_emb = Llama3RotaryEmbedding(config=self.config)
+                # self.rotary_emb = Llama3RotaryEmbedding(config=self.config)
+                raise ValueError(f"Unknown RoPE scaling type {scaling_type}")
             else:
                 raise ValueError(f"Unknown RoPE scaling type {scaling_type}")
 
